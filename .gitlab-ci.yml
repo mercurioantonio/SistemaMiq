@@ -1,0 +1,143 @@
+stages:
+- build
+- package
+- deploy
+
+variables:
+  DOCKER_TLS_CERTDIR: ""
+  CLOUD: AWS
+
+default:
+  retry:
+    max: 1
+    when:
+    - runner_system_failure
+    - stuck_or_timeout_failure
+
+########## CHECH CODE AND SECURITY ##########
+########## BUILD BE ##########
+
+build-BE:
+  stage: build
+
+  image: public.ecr.aws/f3z9g7k3/datamanagement/gitlab_ci/python:3.10-buster
+
+  script:
+    - apt-get update
+    - apt-get install -y gettext moreutils
+    - make build_be
+
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "dev"'
+
+  cache:
+    key: build-cache-be-${CI_COMMIT_SHA}
+    paths:
+      - docker/image_builder/backend/
+    policy: push
+
+########## CHECH CODE AND SECURITY ##########
+########## BUILD FE ##########
+
+build-FE:
+  stage: build
+
+  image: public.ecr.aws/f3z9g7k3/datamanagement/gitlab_ci/node:18
+
+  script:
+    - apt-get update && apt-get install -y gettext moreutils && apt-get install -y make
+    - make build_fe
+
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "dev"'
+
+  cache:
+    key: build-cache-fe-${CI_COMMIT_SHA}
+    paths:
+      - docker/image_builder/frontend/
+    policy: push
+
+
+########## PACKAGE ##########
+
+docker-build-push:
+  stage: package
+
+  image: public.ecr.aws/f3z9g7k3/base-docker-docker:1.43
+
+  services:
+  - name: public.ecr.aws/f3z9g7k3/base-docker-dind:20.10
+    alias: docker
+
+  variables:
+    GITLAB_TOKEN: $CI_JOB_TOKEN
+
+  before_script:
+  - echo "GitLab token ${GITLAB_TOKEN}"
+  - export AWS_DOCKER_REPO=`echo ${PLANT}/${CI_PROJECT_NAME} | tr '[:upper:]' '[:lower:]' | tr '_' '-'`
+  - apk add gettext moreutils
+  - export TAG_IMAGE_ENV=`echo $CI_COMMIT_BRANCH-${CI_COMMIT_SHORT_SHA}`
+
+  script:
+  - chmod +x ./infrastructure/k8s/script/docker-build-push.sh
+  - make docker_build_push
+
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "dev"'
+
+  cache:
+    - key: build-cache-fe-${CI_COMMIT_SHA}
+      paths:
+        - docker/image_builder/frontend/
+      policy: pull
+    - key: build-cache-be-${CI_COMMIT_SHA}
+      paths:
+        - docker/image_builder/backend/
+      policy: pull
+
+########## DEPLOY ANCHOR ##########
+
+.deploy: &deploy
+  stage: deploy
+  image: 
+    name: public.ecr.aws/f3z9g7k3/kubectl:1.21-debian-awscli
+    entrypoint: [""]
+
+  before_script:
+  - export TAG_IMAGE_ENV=`echo $CI_COMMIT_BRANCH-${CI_COMMIT_SHORT_SHA}`
+  - mkdir ~/.kube
+  - chmod +x infrastructure/k8s/script/configK8s.sh && . ./infrastructure/k8s/script/configK8s.sh
+  - source ./infrastructure/k8s/script/config.conf
+  - export PLANT=`echo ${PLANT} | tr '_' '-' | tr '[:upper:]' '[:lower:]'`
+  - export APPNAME=`echo ${CI_PROJECT_NAME} | tr '_' '-' |  tr '[:upper:]' '[:lower:]'`
+  - chmod +x infrastructure/k8s/script/export-ips.sh && . ./infrastructure/k8s/script/export-ips.sh
+  - apt-get update && apt-get install -y gettext moreutils
+  - chmod +x ./infrastructure/k8s/script/route53-assume-role.sh && . ./infrastructure/k8s/script/route53-assume-role.sh
+  - envsubst < infrastructure/k8s/script/route53-record.json | sponge infrastructure/k8s/script/route53-record.json
+  - chmod +x ./infrastructure/k8s/script/generate-variables.sh && ./infrastructure/k8s/script/generate-variables.sh
+ 
+  script:
+  - make deploy
+  - aws route53 change-resource-record-sets --hosted-zone-id Z06213912ENWSRHBJOMKT --change-batch file://infrastructure/k8s/script/route53-record.json || true
+
+########## DEPLOY ##########
+
+deploy-dev:
+  <<: *deploy
+
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+
+  environment:
+    name: dev
+
+deploy-prd:
+  <<: *deploy
+
+  environment:
+    name: prd
+  
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "main"'
+      when: manual
+

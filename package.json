@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "ng2-lazyload-image": "^2.4.0"
+  }
+}
