@@ -1,0 +1,58 @@
+################################################## MANDATORY LIBRARIES DON'T REMOVE ##################################################
+
+# FastAPI is a modern, fast (high-performance), web framework for building APIs with Python 3.7+ based on standard Python type hints.
+fastapi==0.86.0
+
+# Pydantic is a very useful library for parsing json, configuration files and inputs in general, it is used in fastapi and is based on type hints
+pydantic==1.10.2
+
+# Mypy is an optional static type checker for Python that aims to combine the benefits of dynamic (or "duck") typing and static typing.
+mypy==0.990
+
+# Black is the uncompromising Python code formatter
+black==22.10.0
+
+# Flask allows you to create a Rest interface for your apps
+flask==2.1.2
+
+# Gunicorn 'Green Unicorn' is a Python WSGI HTTP Server for UNIX
+gunicorn==19.9.0
+
+# WhiteNoise allows your web app to serve its own static files, making it a self-contained unit that can be deployed anywhere
+whitenoise==4.0b4
+
+# Boto3 is the sdk created for python to access at aws services
+boto3==1.28.16
+
+# S3Fs is a Pythonic file interface to S3. It builds on top of botocore
+s3fs==0.4.2
+
+# This library provides a Python API for functionality provided by the Arrow C++ libraries, along with tools for Arrow integration and interoperability with pandas, NumPy, and other software in the Python ecosystem.
+pyarrow==13.0.0
+
+#pandas is a Python package that provides fast, flexible, and expressive data structures designed to make working with "relational" or "labeled" data
+pandas==1.5.3
+
+
+################################################## YOU CUSTOM LIBRARY SECTION ##################################################
+# Please insert in this section your specific python libraries to manage your businerss logic, if necessary
+flask-cors==3.0.10
+requests==2.28.2
+urllib3==1.26.15
+Werkzeug==2.3.7
+APScheduler==3.5.1
+jinja2==3.0.3
+itsdangerous==2.0.1
+openpyxl==3.0.7
+psycopg2==2.9.5
+python-dotenv==0.19.2
+pytz==2021.1
+tzlocal<3.0
+SQLAlchemy==1.4.16
+Werkzeug==2.3.7
+xlrd==1.1.0
+pymssql<3.0
+flask_sqlalchemy
+Pillow==10.1.0
+sklearn==0.0
+scikit-learn==1.4.0
