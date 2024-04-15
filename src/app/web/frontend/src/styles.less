@@ -1,0 +1,202 @@
+// Custom Theming for NG-ZORRO
+// For more information: https://ng.ant.design/docs/customize-theme/en
+
+// Override less variables to here
+// View all variables: https://github.com/NG-ZORRO/ng-zorro-antd/blob/master/components/style/themes/default.less
+
+// @primary-color: #1890ff;
+/* You can add global styles to this file, and also import other style files */
+@import "../node_modules/ng-zorro-antd/ng-zorro-antd.less";
+@primary-color: #FABB09;
+@success-color: #06d358;
+@text-color: #3d3d3d;
+@text-color-dark: #3d3d3d;
+@btn-border-radius-base: 6px;
+@height-base: 40px;
+@border-radius-base: 6px;
+@input-addon-bg: #FABB09;
+@input-border-color: #fff;
+@label-color: @text-color;
+@table-border-radius-base: 18px;
+@disabled-bg: #5a5a5a;
+@disabled-color: #a0a0a0;
+@message-notice-content-bg: #fff;
+@layout-header-background: #2d2d2d;
+@menu-dark-inline-submenu-bg: #2d2d2d;
+@layout-header-padding: 0;
+
+@font-face {
+  font-family:Arial, Helvetica, sans-serif
+  // src: url("./assets/font/GothamBook.ttf");
+}
+
+@font-face {
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 700;
+  // src: url("./assets/font/GothamBold.otf");
+}
+
+@font-face {
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 500;
+  // src: url("./assets/font/GothamMedium.ttf");
+}
+
+@font-face {
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 300;
+  // src: url("./assets/font/GothamLight.otf");
+}
+
+* {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.flex-column {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.flex-row {
+  display: flex !important;
+  flex-direction: row !important;
+}
+
+.ant-btn {
+  &:not(.ant-btn-text, .ant-btn-link) {
+    border: 1.5px solid;
+
+    * {
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: 500;
+    }
+  }
+}
+
+.ant-modal-content {
+  border-radius: 18px;
+}
+
+nz-form-label {
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.bold {
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 500;
+}
+
+.ant-input-number {
+  .ant-input-number-handler-wrap {
+    opacity: 1;
+
+    .ant-input-number-handler {
+      border: none;
+      height: 50%;
+
+      * {
+        color: #fff;
+      }
+
+      &:hover {
+        height: 50% !important;
+      }
+    }
+  }
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #777777;
+  border-radius: 30px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #b2b0b0;
+  border-radius: 30px;
+}
+
+.bold {
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 500;
+}
+
+.primary {
+  color: @primary-color;
+}
+
+.underline {
+  text-decoration: underline;
+}
+
+.italic {
+  font-style: italic;
+}
+
+.ant-message {
+  color: @text-color-dark;
+}
+
+.ant-spin-blur {
+  opacity: 0;
+}
+
+.ant-spin {
+  max-height: unset !important;
+}
+
+.spinner-container {
+  height: 100%;
+
+  .spinner {
+    position: absolute;
+    top: 50%;
+    animation: 1s linear infinite spinner;
+    animation-play-state: inherit;
+  }
+
+  ::ng-deep .ant-spin-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    &.ant-spin-blur {
+      opacity: 0.5;
+    }
+  }
+}
+
+@keyframes spinner {
+  0% {
+    transform: translate3d(-50%, -50%, 0) rotate(0deg);
+  }
+  100% {
+    transform: translate3d(-50%, -50%, 0) rotate(360deg);
+  }
+}
+
+.favicon {
+  width: 2000%;
+  height: 2000%;
+}
+
+.ant-alert-info {
+  background-color: #e6f7ff;
+  border-color:  #1890ff;
+}
+
+.ant-alert-info .ant-alert-icon {
+  color: #1890ff;
+}
+
+.ant-pagination ul, .ant-pagination ol {
+  margin-inline-end: auto;
+}
