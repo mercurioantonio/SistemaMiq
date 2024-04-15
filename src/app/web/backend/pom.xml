@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.pirelli</groupId>
+	<artifactId>application</artifactId>
+	<version>1.0.0</version>
+	<dependencies>
+		<dependency>
+			<groupId>org.sonarsource.scanner.maven</groupId>
+			<artifactId>sonar-maven-plugin</artifactId>
+			<version>3.2</version>
+		</dependency>
+	</dependencies>
+
+	<profiles>
+		<profile>
+			<id>sonar</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<sonar.host.url>
+					${env.SONARQUBE_HOST}
+				</sonar.host.url>
+				<sonar.sources>./app_tmpl</sonar.sources>
+				<sonar.forceAuthentication>true</sonar.forceAuthentication>
+				<sonar.projectKey>app_tmpl003_backend</sonar.projectKey>
+				<sonar.projectName>app_tmpl003_backend</sonar.projectName>
+
+			</properties>
+		</profile>
+	</profiles>
+</project>
