@@ -1,0 +1,111 @@
+<div class="login-container">
+  <div class="background-layer"></div>
+  <div class="login-card flex-row" [ngClass]="loginSuccess ? 'welcome' : ''">
+    <div class="left flex-column">
+      <div class="text">
+        <div class="title">
+          <div class="item">Elevate your work,</div>
+          <br />
+          <div class="item">Drive our Future!</div>
+        </div>
+        <div class="subtitle">
+          <div class="item">
+            Harness the power of our advanced digital work tool
+          </div>
+          <br />
+          <div class="item">
+            to improve your productivity and unleash your full potential.
+          </div>
+          <br />
+          <div class="item">Together we shape the future of our business.</div>
+        </div>
+        <img class="logo" src="./assets/Logo_Pirelli.png" />
+
+        <div class="welcome-title">Welcome to</div>
+        <div class="app-title">{{ environment.app_title }}</div>
+      </div>
+    </div>
+    <div class="right" [ngClass]="!loginSuccess ? 'flex-column' : ''">
+      <ng-template #indicatorTemplate>
+        <img class="spinner" src="./assets/spinner.svg" />
+      </ng-template>
+      <ng-container *ngIf="!loginSuccess; else loginSuccessTpl">
+        <nz-spin
+          class="spinner-container solid"
+          [nzIndicator]="indicatorTemplate"
+          [nzSpinning]="loading"
+        >
+          <div class="title">Hello, welcome back!</div>
+          <div class="login-form-container flex-column">
+            <div class="login-form-title">
+              <img src="./assets/user.svg" />
+              Login area
+            </div>
+            <form
+              nz-form
+              nzLayout="vertical"
+              class="login-form flex-column"
+              (submit)="login()"
+              #loginForm="ngForm"
+            >
+              <nz-form-item>
+                <nz-form-label nzRequired> Email</nz-form-label>
+                <nz-form-control nzErrorTip="Email is required">
+                  <input
+                    nz-input
+                    name="email"
+                    placeholder="Enter email address"
+                    required
+                    [(ngModel)]="email"
+                  />
+                </nz-form-control>
+              </nz-form-item>
+
+              <nz-form-item>
+                <nz-form-label nzRequired> Password</nz-form-label>
+                <nz-form-control nzErrorTip="Password is required">
+                  <nz-input-group [nzSuffix]="suffixTemplate">
+                    <input
+                      [type]="passwordVisible ? 'text' : 'password'"
+                      nz-input
+                      name="password"
+                      placeholder="Enter password"
+                      required
+                      [(ngModel)]="password"
+                    />
+                  </nz-input-group>
+                  <ng-template #suffixTemplate>
+                    <span
+                      nz-icon
+                      [nzType]="passwordVisible ? 'eye-invisible' : 'eye'"
+                      (click)="passwordVisible = !passwordVisible"
+                    ></span>
+                  </ng-template>
+                </nz-form-control>
+              </nz-form-item>
+              <button
+                nz-button
+                type="submit"
+                nzType="primary"
+                class="login-btn"
+                [disabled]="!loginForm.form.valid"
+              >
+                Login
+              </button>
+            </form>
+          </div>
+        </nz-spin>
+      </ng-container>
+
+      <ng-template #loginSuccessTpl>
+        <div class="success-container flex-column">
+          <div class="success-title">
+            Login effettuato <br />
+            con successo!
+          </div>
+          <img class="success-icon" src="assets/success.svg" />
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>
