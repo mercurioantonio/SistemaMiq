@@ -1,0 +1,424 @@
+<div >
+  <div >
+    <button nz-button *ngIf="!myCheckAll && !myCheckUser" (click)="Login()" nzType="primary" nzSize="large">Login</button>
+    <button nz-button *ngIf="(!myCheckAll && !myCheckUser) || myCheckUser" class="esporta" (click)="esporta()"  nz-button nzType="primary" nzSize="large">Esporta in Excel</button>
+    <div nz-row>
+      <button nz-button *ngIf="myCheckAll || myCheckUser" nzType="primary" (click)="effettuaLogout()" style="margin-right: 10px">Logout</button>
+      <span *ngIf="myCheckAll">Ciao sei loggato con credenziali da Amministratore</span>
+      <span *ngIf="myCheckUser">Ciao sei loggato con credenziali da User</span>
+      </div>
+  </div>
+
+  <nz-modal *ngIf="login" [(nzVisible)]="login" [nzTitle]="modalTitle"   [nzContent]="modalContent"    [nzFooter]="modalFooter" (nzOnCancel)="chiudiLogin()">
+    <ng-template #modalTitle >Login</ng-template>
+    <ng-template #modalContent>
+      <p>
+        Username:
+        <input type="text" nz-input placeholder="Username"  [(ngModel)]="username"/>
+      </p>
+      <p>
+        Password:
+        <input [type]="passwordVisible ? 'text' : 'password'" nz-input placeholder="Password"  [(ngModel)]="password"/>  
+      </p>
+    </ng-template>
+    <ng-template #modalFooter>
+      <button nz-button *ngIf="!myCheckAll && !myCheckUser" nzType="primary" (click)="effettuaLogin(username, password)">Login</button>
+    </ng-template>
+  </nz-modal>
+
+  <div nz-row *ngIf="myCheckAll" style="margin-bottom: 5px">
+    <br>
+    <button nz-button class="add" (click)="addRow()"  nz-button nzType="primary" nzSize="large">Aggiungi</button>
+    <button nz-button class="esporta" (click)="esporta()"  nz-button nzType="primary" nzSize="large">Esporta in Excel</button>
+    <br />
+  </div>
+
+    <div *ngIf="add" >
+    <nz-table nzBordered  [nzData]="insert" style="overflow-x:auto" [nzFrontPagination]="false">
+      <thead>
+      <tr>
+          <th nzWidth="200px">AZIONI</th>
+          <th nzWidth="120px"><span style="color: red; margin-right:4px">*</span>COD MIQ</th>
+          <th nzWidth="120px"><span style="color: red; margin-right:4px">*</span>SCM</th>
+          <th>CLASSE</th>
+          <th nzWidth="260px">DENOMINAZIONE STRUMENTO</th>
+          <th nzWidth="200px"><span style="color: red; margin-right:4px">*</span>DATA ULT. TARAT</th>
+          <th nzWidth="230px"><span style="color: red; margin-right:4px">*</span>INTERVALLO DI TARATURA</th>
+          <th nzWidth="110px">IN USO</th>
+          <th nzWidth="160px">IN RIPARAZIONE</th>
+          <th nzWidth="180px">CERTIFICATO N°</th>
+          <th nzWidth="180px">CAMPO DI MISURA</th>
+          <th>RISOLUZIONE</th>
+          <th nzWidth="250px">INCERTEZZA</th>
+          <th nzWidth="180px">TOLL TECNICA STABILITÀ</th>
+          <th nzWidth="180px">TOLL TECNICA RIPETIBILITÀ</th>
+          <th>TOLLERANZA PROCESSO</th>
+          <th>TUR</th>
+          <th>CAPABILITY</th>
+          <th nzWidth="150px">Y RIF</th>
+          <th nzWidth="150px">T PRE</th>
+          <th nzWidth="150px">PT INT A</th>
+          <th nzWidth="150px">PT INT B</th>
+          <th nzWidth="150px">PT INT C</th>
+          <th nzWidth="150px">PT INT D</th>
+          <th nzWidth="150px">PT INT E</th>
+          <th nzWidth="150px">PT INT F</th>
+          <th>GRANDEZZA MISURATA</th>
+          <th nzWidth="180px">UNITÀ DI MISURA</th>
+          <th>CAMPIONE DI RIFERIMENTO</th>
+          <th>CASA COSTRUTTRICE</th>
+          <th nzWidth="150px">MODELLO</th>
+          <th>REPARTO</th>
+          <th>LOCALIZZAZIONE</th>
+          <th>SOT</th>
+          <th>ADDETTO TARATURA</th>
+          <th>RESPONSABILE TARATURA</th>
+          <th nzWidth="180px">UMIDITÀ RELATIVA</th>
+          <th nzWidth="180px">TEMPERATURA</th>
+          <th>TARATURA</th>
+          <th nzWidth="190px">EMISSIONE</th>
+          <th>DATA EMISSIONE</th>
+          <th nzWidth="190px">REVISIONE</th>
+          <th>DATA REVISIONE</th>
+          <th><span style="color: red; margin-right:4px">*</span>MATRICOLA</th>
+          <th nzWidth="250px">NOTE</th>
+          <th>COD MIQ VECCHIO</th>
+          <th nzWidth="180px">PREPARATO DA</th>        
+      </tr>
+    </thead>
+              <tbody >
+                <tr>
+              <td>
+              <div nz-row class="button-container">
+                <div nz-col >
+                  <button (click)="insertEdit(insert[0].id)" [disabled]="insert[0].cod_miq == '' || insert[0].scm == '' || insert[0].data_ult_tarat == '' || insert[0].intervallo_di_taratura == '' || insert[0].matricola == ''" style="margin-right: 10px;">Inserisci</button>
+                </div>
+                <div nz-col>
+                  <button nz-popconfirm nzPopconfirmTitle="Sei sicuro di annullare l'inseriemento?" (nzOnConfirm)="cancelInsert(insert[0].id)">Elimina</button>
+                </div>
+              </div>
+              </td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].cod_miq" oninput="this.value = this.value.toUpperCase()" maxlength="7"/></td>
+              <td>
+                <!-- <input type="number" nz-input [(ngModel)]="insert[0].scm" oninput="this.value = Math.abs(this.value)" min="0" max="171"/> -->
+                <nz-select [(ngModel)]="insert[0].scm" style="width: 80px;">
+                  <nz-option *ngFor="let scmValue of filter_scm" [nzLabel]="scmValue.text" [nzValue]="scmValue.value" ></nz-option>
+                </nz-select>
+              </td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].classe" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].denominazione_strumento"/></td>
+              <td>
+                <nz-date-picker
+                  [(ngModel)]="insert[0].data_ult_tarat"
+                  [nzFormat]="'dd-MM-yyyy'"
+                ></nz-date-picker>
+              </td>
+              <td>
+                <!-- <input type="text" nz-input [(ngModel)]="insert[0].intervallo_di_taratura" /> -->
+                <nz-select [(ngModel)]="insert[0].intervallo_di_taratura" style="width: 180px;">
+                  <nz-option *ngFor="let intervallo_di_taraturaValue of filter_intervallo_di_taratura" [nzLabel]="intervallo_di_taraturaValue.text" [nzValue]="intervallo_di_taraturaValue.value" ></nz-option>
+                </nz-select>
+              </td>
+              <td>
+                <nz-select [(ngModel)]="insert[0].in_uso" style="width: 90px;">
+              
+                  <nz-option nzValue="true" nzLabel="true"></nz-option>
+                  <nz-option nzValue="false" nzLabel="false"></nz-option>
+                </nz-select>
+              </td>
+              <td>
+                <nz-select [(ngModel)]="insert[0].in_riparazione" style="width: 90px;">
+              
+                  <nz-option nzValue="true" nzLabel="true"></nz-option>
+                  <nz-option nzValue="false" nzLabel="false"></nz-option>
+                </nz-select>
+              </td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].n_cert" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].campo_di_misura" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].risoluzione" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].incertezza" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].toll_tecnica_stabilita" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].toll_tecnica_ripetibilita" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].tolleranza_processo" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].tur" disabled/></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].capability" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].y_rif"/></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].T_pre" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].pt_int_A" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].pt_int_B" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].pt_int_C" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].pt_int_D" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].pt_int_E" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].pt_int_F" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].grandezza_misurata" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].unita_di_misura" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].campione_di_riferimento" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].casa_costruttrice" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].modello" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].reparto" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].localizzazione" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].sot" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].addetto_taratura" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].responsabile_taratura" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].umidita_relativa" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].temperatura" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].taratura" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].emissione" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].data_emissione" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].revisione" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].data_revisione" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].matricola" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].note" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].cod_miq_vecchio" /></td>
+              <td><input type="text" nz-input [(ngModel)]="insert[0].preparato_da" /></td>
+            </tr>
+          </tbody>
+  </nz-table>
+</div>
+<br>
+<br>
+    <nz-table #editRowTable [nzFrontPagination]="true" [nzShowPagination]="true" [nzBordered]="true" nzBordered [nzData]="listOfDisplayData" style="overflow-x: auto;"
+      [nzPageIndex]="1" [nzTotal]="listOfDisplayData.length" [nzShowTotal]="totalTemplate">
+      <ng-template #totalTemplate let-total>Totale strumenti: {{ total }} </ng-template>
+        <thead>
+        <tr>
+            <th>AZIONI</th>
+            <th nzCustomFilter nzWidth="120px">
+                COD MIQ
+                <nz-filter-trigger [(nzVisible)]="visible_cod_miq" [nzActive]="searchValue_cod_miq.length > 0" [nzDropdownMenu]="menu_cod_miq">
+                  <span  nz-icon nzType="search" nzTheme="outline"></span>
+                </nz-filter-trigger>
+            </th>
+            <th nzShowFilter [nzFilters]="filter_scm" (nzFilterChange)="filterScm($event) " nzMode="multiple">SCM</th>
+            <th>CLASSE</th>
+            <th nzCustomFilter nzWidth="300px">DENOMINAZIONE STRUMENTO
+                <nz-filter-trigger [(nzVisible)]="visible_denominazione" [nzActive]="searchValue_denominazione.length > 0" [nzDropdownMenu]="menu_denominazione">
+                  <span  nz-icon nzType="search" nzTheme="outline"></span>
+                </nz-filter-trigger>
+            </th>
+            <th nzWidth="160px">DATA ULT. TARAT</th>
+            <th nzWidth="160px">FREQ. TARAT GG</th>
+            <th nzWidth="160px">INTERVALLO DI TARATURA</th>
+            <th nzWidth="160px">SCADENZA</th>
+            <th>SETTIMANA SCADENZA</th>
+            <th nzShowFilter [nzFilters]="filter_year" (nzFilterChange)="filterYear($event)" nzMode="multiple">ANNO SCADENZA</th>
+            <th nzShowFilter [nzFilters]="filter_in_uso" (nzFilterChange)="filterInUso($event)" nzMode="multiple" nzWidth="110px">IN USO</th>
+            <th nzWidth="160px">IN RIPARAZIONE</th>
+            <th nzWidth="180px">CERTIFICATO N°</th>
+            <th nzWidth="180px">CAMPO DI MISURA</th>
+            <th>RISOLUZIONE</th>
+            <th nzWidth="250px">INCERTEZZA</th>
+            <th nzWidth="180px">TOLL TECNICA STABILITÀ</th>
+            <th nzWidth="180px">TOLL TECNICA RIPETIBILITÀ</th>
+            <th>TOLLERANZA PROCESSO</th>
+            <th>TUR</th>
+            <th>CAPABILITY</th>
+            <th nzWidth="150px">Y RIF</th>
+            <th nzWidth="150px">T PRE</th>
+            <th nzWidth="150px">PT INT A</th>
+            <th nzWidth="150px">PT INT B</th>
+            <th nzWidth="150px">PT INT C</th>
+            <th nzWidth="150px">PT INT D</th>
+            <th nzWidth="150px">PT INT E</th>
+            <th nzWidth="150px">PT INT F</th>
+            <th>GRANDEZZA MISURATA</th>
+            <th nzWidth="180px">UNITÀ DI MISURA</th>
+            <th nzShowFilter [nzFilters]="filter_campione" (nzFilterChange)="filterCampione($event) " nzMode="multiple">CAMPIONE DI RIFERIMENTO</th>
+            <th>CASA COSTRUTTRICE</th>
+            <th nzWidth="150px">MODELLO</th>
+            <th>REPARTO</th>
+            <th>LOCALIZZAZIONE</th>
+            <th>SOT</th>
+            <th>ADDETTO TARATURA</th>
+            <th>RESPONSABILE TARATURA</th>
+            <th nzWidth="180px">UMIDITÀ RELATIVA</th>
+            <th nzWidth="180px">TEMPERATURA</th>
+            <th>TARATURA</th>
+            <th nzWidth="190px">EMISSIONE</th>
+            <th>DATA EMISSIONE</th>
+            <th nzWidth="190px">REVISIONE</th>
+            <th>DATA REVISIONE</th>
+            <th>MATRICOLA</th>
+            <th nzWidth="250px">NOTE</th>
+            <th>COD MIQ VECCHIO</th>
+            <th nzWidth="180px">PREPARATO DA</th>        
+        </tr>
+        </thead>
+        <tbody >
+        <tr *ngFor="let data of editRowTable.data">
+            <ng-container *ngIf="!editCache[data.id].edit; else editTemplate">
+                <td *ngIf="myCheckAll"><a (click)="startEdit(data.id)">Modifica</a></td>
+                <td *ngIf="!myCheckAll"></td>
+                <td>{{ data.cod_miq }}</td>
+                <td>{{ data.scm }}</td>
+                <td>{{ data.classe }}</td>
+                <td>{{data.denominazione_strumento}}</td>
+                <td>{{ data.data_ult_tarat | date:'dd-MM-yyyy'}}</td>
+                <td>{{ data.freq_tarat_gg }}</td>
+                <td>{{ data.intervallo_di_taratura }}</td>
+                <td>{{ data.scadenza | date:'dd-MM-yyyy'}}</td>
+                <td>{{ data.settimana_scadenza }}</td>
+                <td>{{ data.anno_scadenza }}</td>
+                <td>{{ data.in_uso }}</td>
+                <td>{{ data.in_riparazione }}</td>
+                <td>{{ data.n_cert }}</td>
+                <td>{{ data.campo_di_misura }}</td>
+                <td>{{data.risoluzione}}</td>
+                <td>{{ data.incertezza }}</td>
+                <td>{{ data.toll_tecnica_stabilita }}</td>
+                <td>{{ data.toll_tecnica_ripetibilita }}</td>
+                <td>{{ data.tolleranza_processo }}</td>
+                <td>{{ data.tur }}</td>
+                <td>{{ data.capability }}</td>
+                <td>{{ data.y_rif }}</td>
+                <td>{{ data.T_pre }}</td>
+                <td>{{data.pt_int_A}}</td>
+                <td>{{ data.pt_int_B }}</td>
+                <td>{{ data.pt_int_C }}</td>
+                <td>{{ data.pt_int_D }}</td>
+                <td>{{ data.pt_int_E }}</td>
+                <td>{{ data.pt_int_F }}</td>
+                <td>{{ data.grandezza_misurata }}</td>
+                <td>{{ data.unita_di_misura }}</td>
+                <td>{{ data.campione_di_riferimento }}</td>
+                <td>{{ data.casa_costruttrice }}</td>
+                <td>{{ data.modello }}</td>
+                <td>{{data.reparto}}</td>
+                <td>{{ data.localizzazione }}</td>
+                <td>{{ data.sot }}</td>
+                <td>{{ data.addetto_taratura }}</td>
+                <td>{{ data.responsabile_taratura }}</td>
+                <td>{{ data.umidita_relativa }}</td>
+                <td>{{ data.temperatura }}</td>
+                <td>{{ data.taratura }}</td>
+                <td>{{ data.emissione }}</td>
+                <td>{{data.data_emissione}}</td>
+                <td>{{ data.revisione }}</td>
+                <td>{{ data.data_revisione }}</td>
+                <td>{{ data.matricola }}</td>
+                <td>{{ data.note }}</td>
+                <td>{{ data.cod_miq_vecchio }}</td>
+                <td>{{ data.preparato_da }}</td>
+            </ng-container>
+            <ng-template #editTemplate>
+                <td>
+                  <a (click)="saveEdit(data.id)" class="save">Salva</a>
+                  <a nz-popconfirm nzPopconfirmTitle="Sei sicuro di voler eliminare lo strumento?" (nzOnConfirm)="cancelEdit(data.id)">Elimina</a>
+                  <a (click)="annullaEdit(data.id)" class="annulla">Annulla</a>
+                </td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.cod_miq" oninput="this.value = this.value.toUpperCase()" maxlength="7"/></td>
+                <td>
+                  <nz-select [(ngModel)]="editCache[data.id].data.scm" style="width: 80px;">
+                    <nz-option *ngFor="let scmValue of filter_scm" [nzLabel]="scmValue.text" [nzValue]="scmValue.value" ></nz-option>
+                  </nz-select>
+                </td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.classe" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.denominazione_strumento" /></td>
+                <td>
+                    <nz-date-picker
+                      [(ngModel)]="editCache[data.id].data.data_ult_tarat"
+                      [nzFormat]="'dd-MM-yyyy'"
+                    ></nz-date-picker>
+                </td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.freq_tarat_gg" disabled/></td>
+                <td>
+                  <nz-select [(ngModel)]="editCache[data.id].data.intervallo_di_taratura" style="width: 180px;">
+                    <nz-option *ngFor="let intervallo_di_taraturaValue of filter_intervallo_di_taratura" [nzLabel]="intervallo_di_taraturaValue.text" [nzValue]="intervallo_di_taraturaValue.value" ></nz-option>
+                  </nz-select>
+                </td>
+                <td>
+                  <nz-date-picker
+                  [(ngModel)]="editCache[data.id].data.scadenza"
+                  [nzFormat]="'dd-MM-yyyy'" disabled
+                ></nz-date-picker>
+                </td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.settimana_scadenza" disabled/></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.anno_scadenza" disabled/></td>
+                <td>
+                  <nz-select [(ngModel)]="editCache[data.id].data.in_uso" style="width: 90px;">
+                    <nz-option *ngIf="isEditing(data.id)" [nzValue]="editCache[data.id].data.in_uso" [nzLabel]="editCache[data.id].data.in_uso"></nz-option>
+                    <nz-option nzValue="true" nzLabel="true"></nz-option>
+                    <nz-option nzValue="false" nzLabel="false"></nz-option>
+                  </nz-select>
+                </td>
+                <td>
+                  <nz-select [(ngModel)]="editCache[data.id].data.in_riparazione" style="width: 90px;">
+                    <nz-option *ngIf="isEditing(data.id)" [nzValue]="editCache[data.id].data.in_riparazione" [nzLabel]="editCache[data.id].data.in_riparazione"></nz-option>
+                    <nz-option nzValue="true" nzLabel="true"></nz-option>
+                    <nz-option nzValue="false" nzLabel="false"></nz-option>
+                  </nz-select>
+                </td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.n_cert" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.campo_di_misura" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.risoluzione" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.incertezza" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.toll_tecnica_stabilita" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.toll_tecnica_ripetibilita" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.tolleranza_processo" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.tur" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.capability" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.y_rif" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.T_pre" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.pt_int_A" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.pt_int_B" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.pt_int_C" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.pt_int_D" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.pt_int_E" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.pt_int_F" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.grandezza_misurata" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.unita_di_misura" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.campione_di_riferimento" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.casa_costruttrice" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.modello" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.reparto" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.localizzazione" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.sot" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.addetto_taratura" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.responsabile_taratura" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.umidita_relativa" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.temperatura" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.taratura" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.emissione" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.data_emissione" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.revisione" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.data_revisione" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.matricola" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.note" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.cod_miq_vecchio" /></td>
+                <td><input type="text" nz-input [(ngModel)]="editCache[data.id].data.preparato_da" /></td>
+            </ng-template>
+      </tr>
+      </tbody>
+    </nz-table>
+
+    <nz-modal *ngIf="modalDueDate" [(nzVisible)]="modalDueDate" [nzTitle]="modalTitle"   [nzContent]="modalContent" [nzFooter]="modalFooter" [nzWidth]="700" [nzCentered]="true" (nzOnCancel)="chiudiModalDueDate()">
+      <ng-template #modalTitle >Scadenza dello strumento modificato</ng-template>
+      <ng-template #modalContent>
+      <h1 >COD MIQ: {{modalScadenza_cod_miq}}</h1>
+      <h1 >Nuova scadenza: {{calculateDueDate()}}, Week: {{calculateDueWeek()}}</h1>
+      </ng-template>
+      <ng-template #modalFooter>
+      </ng-template>
+
+    </nz-modal>
+
+    <nz-dropdown-menu #menu_cod_miq="nzDropdownMenu" >
+        <div class="ant-table-filter-dropdown">
+          <div class="search-box">
+            <input type="text" nz-input placeholder="Cerca cod MIQ" [(ngModel)]="searchValue_cod_miq" oninput="this.value = this.value.toUpperCase()" (keyup.enter)="search_cod_miq()" maxlength="7"/>
+            <button nz-button  nzSize="small" (click)="search_cod_miq()" class="search-button">Cerca</button>
+            <button nz-button nzSize="small" (click)="reset_cod_miq()">Reset</button>
+          </div>
+        </div>
+    </nz-dropdown-menu>
+
+    <nz-dropdown-menu #menu_denominazione="nzDropdownMenu" >
+        <div class="ant-table-filter-dropdown" style="width: 270px">
+          <div class="search-box">
+            <input type="text" nz-input placeholder="Cerca denominazione strumento" [(ngModel)]="searchValue_denominazione" oninput="this.value" (keyup.enter)="search_denominazione()" style="width: 250px"/>
+            <button nz-button  nzSize="small" (click)="search_denominazione()" class="search-button" style="width: 120px">Cerca</button>
+            <button nz-button nzSize="small" (click)="reset_denominazione()" style="width: 120px">Reset</button>
+          </div>
+        </div>
+      </nz-dropdown-menu>
+</div>

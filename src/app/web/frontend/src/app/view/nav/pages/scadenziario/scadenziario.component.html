@@ -1,0 +1,402 @@
+<div class="clear-fix">
+
+  <div>
+    <button nz-button *ngIf="!myCheckAll && !myCheckUser" (click)="Login()" nzType="primary" nzSize="large">Login</button>
+    <button nz-button class="esporta" (click)="esportaScadenziario()"  nz-button nzType="primary" nzSize="large">Esporta in Excel</button>
+    
+    <div nz-row>
+    <button nz-button *ngIf="myCheckAll || myCheckUser" nzType="primary" (click)="effettuaLogout()" style="margin-right: 10px">Logout</button>
+    <span *ngIf="myCheckAll">Ciao sei loggato con credenziali da Amministratore</span>
+    <span *ngIf="myCheckUser">Ciao sei loggato con credenziali da User</span>
+    </div>
+  </div>
+
+  <nz-modal *ngIf="login" [(nzVisible)]="login" [nzTitle]="modalTitle"   [nzContent]="modalContent"    [nzFooter]="modalFooter" (nzOnCancel)="chiudiLogin()">
+    <ng-template #modalTitle >Login</ng-template>
+    <ng-template #modalContent>
+      <p>
+        Username:
+        <input type="text" nz-input placeholder="Username"  [(ngModel)]="username"/>
+      </p>
+      <p>
+        Password:
+        <input [type]="passwordVisible ? 'text' : 'password'" nz-input placeholder="Password"  [(ngModel)]="password"/>  
+      </p>
+    </ng-template>
+    <ng-template #modalFooter>
+      <button nz-button *ngIf="!myCheckAll && !myCheckUser" nzType="primary" (click)="effettuaLogin(username, password)">Login</button>
+    </ng-template>
+  </nz-modal>
+  <br>
+
+  <div>
+    
+    <nz-table #nzTable [nzData]="listOfDisplayData" 
+      [nzPageIndex]="1" [nzTotal]="listOfDisplayData.length" [nzShowTotal]="totalTemplate">
+      <ng-template #totalTemplate let-total>Totale strumenti: {{ total }}</ng-template>
+      <thead>
+        <tr>
+          <th nzCustomFilter nzWidth="100px">
+            COD MIQ
+            <nz-filter-trigger [(nzVisible)]="visible_cod_miq" [nzActive]="searchValue_cod_miq.length > 0" [nzDropdownMenu]="menu_cod_miq">
+              <span  nz-icon nzType="search" nzTheme="outline"></span>
+            </nz-filter-trigger>
+          </th>
+          <th nzShowFilter [nzFilters]="filter_year" (nzFilterChange)="filterYear($event)" nzMode="multiple" nzWidth="130px">ANNO SCADENZA</th>
+          <th nzShowFilter [nzFilters]="filter_settimana" (nzFilterChange)="filterSettimana($event)" nzMode="multiple" nzWidth="110px">SETT. SCADENZA</th>
+          <th nzWidth="120px">DATA ULT. TARAT.</th>
+          <th nzShowFilter [nzFilters]="filter_scm" (nzFilterChange)="filterScm($event) " nzMode="multiple" nzWidth="80px">SCM</th>
+
+          <th nzCustomFilter nzWidth="300px">DENOMINAZIONE STRUMENTO
+            <nz-filter-trigger [(nzVisible)]="visible_denominazione" [nzActive]="searchValue_denominazione.length > 0" [nzDropdownMenu]="menu_denominazione">
+              <span  nz-icon nzType="search" nzTheme="outline"></span>
+            </nz-filter-trigger>
+          </th>
+          <th nzCustomFilter nzWidth="120px">
+            LOCALIZZAZIONE
+            <nz-filter-trigger [(nzVisible)]="visible_localizzazione" [nzActive]="searchValue_localizzazione.length > 0" [nzDropdownMenu]="menu_localizzazione">
+              <span  nz-icon nzType="search" nzTheme="outline"></span>
+            </nz-filter-trigger>
+          </th>
+          <th nzWidth="120px">INTERVALLO DI TARATURA</th>
+          <th nzCustomFilter nzWidth="120px">
+            ADDETTO TARATURA
+            <nz-filter-trigger [(nzVisible)]="visible_addetto" [nzActive]="searchValue_addetto.length > 0" [nzDropdownMenu]="menu_addetto">
+              <span  nz-icon nzType="search" nzTheme="outline"></span>
+            </nz-filter-trigger>
+          </th>
+          <th nzShowFilter [nzFilters]="filter_conferma" (nzFilterChange)="filterConferma($event)" nzMode="multiple" nzWidth="80px">DA CONFERMARE</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let data of nzTable.data">
+          <td *ngIf="myCheckAll || myCheckUser"><a (click)="taratura(data.cod_miq,data.scm)" >{{data.cod_miq }}</a></td>
+          <td *ngIf="!myCheckAll && !myCheckUser">{{ data.cod_miq }}</td>
+          <td>{{ data.anno_scadenza }}</td>
+          <td>{{ data.settimana_scadenza }}</td> 
+          <td>{{ data.data_ult_tarat | date:'dd-MM-yyyy'}}</td>
+          <td>{{ data.scm }}</td>
+          <td>{{ data.denominazione_strumento }}</td>
+          <td>{{ data.localizzazione }}</td>
+          <td>{{ data.intervallo_di_taratura }}</td>
+          <td>{{ data.addetto_taratura }}</td>
+          <td *ngIf="myCheckAll && data.da_confermare === 'Si'"><a (click)="rescueTaratura(data.cod_miq,data.scm)" >🟡</a></td>
+          <td *ngIf="myCheckUser && data.da_confermare === 'Si'">⚪</td>
+        </tr>
+      </tbody>
+    </nz-table>
+
+
+    <nz-modal *ngIf="rescueTaraturaVisible" [(nzVisible)]="rescueTaraturaVisible" [nzTitle]="modalTitle"   [nzContent]="modalContent"    [nzFooter]="modalFooter" [nzWidth]="1700" [nzCentered]="true" (nzOnCancel)="chiudiRescueTaratura()">
+      <ng-template #modalTitle >Taratura da confermare</ng-template>
+      <ng-template #modalContent>
+        <nz-table #nzTable [nzData]="rescue_taratura" [nzFrontPagination]="false" [nzScroll]="{ x: 'auto'}">
+        <thead>
+          <tr>
+            <th nzWidth="200px">AZIONI</th>
+            <th nzWidth="100px">COD MIQ</th>
+            <th nzWidth="150px"><span style="color: red; margin-right:4px">*</span>DATA VALID.</th>
+            <th nzWidth="110px">DATA TARATURA</th>
+            
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y_integrita != null">INTEGRITÀ</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y_conformita != null">CONFORMITÀ</th>
+
+            <th nzWidth="70px" *ngIf="rescue_taratura[0].y_rif !== null">Y. RIF</th>
+            <th nzWidth="70px"  *ngIf="rescue_taratura[0].T_pre !== null">T_PRE</th>
+            <th nzWidth="70px" *ngIf="rescue_taratura[0].LSC_x !== null">LSC_x</th>
+            <th nzWidth="70px" *ngIf="rescue_taratura[0].LIC_x !== null">LIC_x</th>
+            <th nzWidth="70px" *ngIf="rescue_taratura[0].LSC_r !== null">LSC_r</th>
+            <th nzWidth="70px" *ngIf="rescue_taratura[0].LIC_r !== null">LIC_r</th>
+
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].pt_int_A !== null && rescue_taratura[0].pt_int_A !== undefined && rescue_taratura[0].pt_int_A !== ''">PT. INT. A</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].calibrazione_A !== null && rescue_taratura[0].calibrazione_A !== undefined && rescue_taratura[0].pt_int_A !== ''">CALIB. A</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].calibrazione_A !== null && rescue_taratura[0].calibrazione_A !== undefined && rescue_taratura[0].calibrazione_A !== 'No' && rescue_taratura[0].pt_int_A !== ''">VAL_CALIB_A</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].calibrazione_A !== null && rescue_taratura[0].calibrazione_A !== undefined && rescue_taratura[0].calibrazione_A !== 'No' && rescue_taratura[0].pt_int_A !== ''">VAL_CALIB_MASTER_A</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y1_strum_A !== null && rescue_taratura[0].y1_strum_A !== undefined && rescue_taratura[0].pt_int_A !== ''">Y1_STRUM_A</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y1_master_A !== null && rescue_taratura[0].y1_master_A !== undefined && rescue_taratura[0].pt_int_A !== ''">Y1_MASTER_A</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y2_strum_A !== null && rescue_taratura[0].y2_strum_A !== undefined && rescue_taratura[0].pt_int_A !== ''">Y2_STRUM_A</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y2_master_A !== null && rescue_taratura[0].y2_master_A !== undefined && rescue_taratura[0].pt_int_A !== ''">Y2_MASTER_A</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y3_strum_A !== null && rescue_taratura[0].y3_strum_A !== undefined && rescue_taratura[0].pt_int_A !== ''">Y3_STRUM_A</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y3_master_A !== null && rescue_taratura[0].y3_master_A !== undefined && rescue_taratura[0].pt_int_A !== ''">Y3_MASTER_A</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y4_strum_A !== null && rescue_taratura[0].y4_strum_A !== undefined && rescue_taratura[0].pt_int_A !== ''">Y4_STRUM_A</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y4_master_A !== null && rescue_taratura[0].y4_master_A !== undefined && rescue_taratura[0].pt_int_A !== ''">Y4_MASTER_A</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y5_strum_A !== null && rescue_taratura[0].y5_strum_A !== undefined && rescue_taratura[0].pt_int_A !== ''">Y5_STRUM_A</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y5_master_A !== null && rescue_taratura[0].y5_master_A !== undefined && rescue_taratura[0].pt_int_A !== ''">Y5_MASTER_A</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].avg_x_A !== null && rescue_taratura[0].avg_x_A !== undefined && rescue_taratura[0].pt_int_A !== ''">AVG_x_A</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].range_A !== null && rescue_taratura[0].range_A !== undefined && rescue_taratura[0].pt_int_A !== ''">RANGE_A</th>
+
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].pt_int_B !== null && rescue_taratura[0].pt_int_B !== undefined && rescue_taratura[0].pt_int_B !== ''">PT. INT. B</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].calibrazione_B !== null && rescue_taratura[0].calibrazione_B !== undefined && rescue_taratura[0].pt_int_B !== ''">CALIB. B</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].calibrazione_B !== null && rescue_taratura[0].calibrazione_B !== undefined && rescue_taratura[0].calibrazione_B !== 'No' && rescue_taratura[0].pt_int_B !== ''">VAL_CALIB_B</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].calibrazione_B !== null && rescue_taratura[0].calibrazione_B !== undefined && rescue_taratura[0].calibrazione_B !== 'No' && rescue_taratura[0].pt_int_B !== ''">VAL_CALIB_MASTER_B</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y1_strum_B !== null && rescue_taratura[0].y1_strum_B !== undefined && rescue_taratura[0].pt_int_B !== ''">Y1_STRUM_B</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y1_master_B !== null && rescue_taratura[0].y1_master_B !== undefined && rescue_taratura[0].pt_int_B !== ''">Y1_MASTER_B</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y2_strum_B !== null && rescue_taratura[0].y2_strum_B !== undefined && rescue_taratura[0].pt_int_B !== ''">Y2_STRUM_B</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y2_master_B !== null && rescue_taratura[0].y2_master_B !== undefined && rescue_taratura[0].pt_int_B !== ''">Y2_MASTER_B</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y3_strum_B !== null && rescue_taratura[0].y3_strum_B !== undefined && rescue_taratura[0].pt_int_B !== ''">Y3_STRUM_B</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y3_master_B !== null && rescue_taratura[0].y3_master_B !== undefined && rescue_taratura[0].pt_int_B !== ''">Y3_MASTER_B</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y4_strum_B !== null && rescue_taratura[0].y4_strum_B !== undefined && rescue_taratura[0].pt_int_B !== ''">Y4_STRUM_B</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y4_master_B !== null && rescue_taratura[0].y4_master_B !== undefined && rescue_taratura[0].pt_int_B !== ''">Y4_MASTER_B</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y5_strum_B !== null && rescue_taratura[0].y5_strum_B !== undefined && rescue_taratura[0].pt_int_B !== ''">Y5_STRUM_B</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y5_master_B !== null && rescue_taratura[0].y5_master_B !== undefined && rescue_taratura[0].pt_int_B !== ''">Y5_MASTER_B</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].avg_x_B !== null && rescue_taratura[0].avg_x_B !== undefined && rescue_taratura[0].pt_int_B !== ''">AVG_x_B</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].range_B !== null && rescue_taratura[0].range_B !== undefined && rescue_taratura[0].pt_int_B !== ''">RANGE_B</th>
+
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].pt_int_C !== null && rescue_taratura[0].pt_int_C !== undefined && rescue_taratura[0].pt_int_C !== ''">PT. INT. C</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].calibrazione_C !== null && rescue_taratura[0].calibrazione_C !== undefined && rescue_taratura[0].pt_int_C !== ''">CALIB. C</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].calibrazione_C !== null && rescue_taratura[0].calibrazione_C !== undefined && rescue_taratura[0].calibrazione_C !== 'No' && rescue_taratura[0].pt_int_C !== ''">VAL_CALIB_C</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].calibrazione_C !== null && rescue_taratura[0].calibrazione_C !== undefined && rescue_taratura[0].calibrazione_C !== 'No' && rescue_taratura[0].pt_int_C !== ''">VAL_CALIB_MASTER_C</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y1_strum_C !== null && rescue_taratura[0].y1_strum_C !== undefined && rescue_taratura[0].pt_int_C !== ''">Y1_STRUM_C</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y1_master_C !== null && rescue_taratura[0].y1_master_C !== undefined && rescue_taratura[0].pt_int_C !== ''">Y1_MASTER_C</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y2_strum_C !== null && rescue_taratura[0].y2_strum_C !== undefined && rescue_taratura[0].pt_int_C !== ''">Y2_STRUM_C</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y2_master_C !== null && rescue_taratura[0].y2_master_C !== undefined && rescue_taratura[0].pt_int_C !== ''">Y2_MASTER_C</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y3_strum_C !== null && rescue_taratura[0].y3_strum_C !== undefined && rescue_taratura[0].pt_int_C !== ''">Y3_STRUM_C</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y3_master_C !== null && rescue_taratura[0].y3_master_C !== undefined && rescue_taratura[0].pt_int_C !== ''">Y3_MASTER_C</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y4_strum_C !== null && rescue_taratura[0].y4_strum_C !== undefined && rescue_taratura[0].pt_int_C !== ''">Y4_STRUM_C</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y4_master_C !== null && rescue_taratura[0].y4_master_C !== undefined && rescue_taratura[0].pt_int_C !== ''">Y4_MASTER_C</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y5_strum_C !== null && rescue_taratura[0].y5_strum_C !== undefined && rescue_taratura[0].pt_int_C !== ''">Y5_STRUM_C</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y5_master_C !== null && rescue_taratura[0].y5_master_C !== undefined && rescue_taratura[0].pt_int_C !== ''">Y5_MASTER_C</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].avg_x_C !== null && rescue_taratura[0].avg_x_C !== undefined && rescue_taratura[0].pt_int_C !== ''">AVG_x_C</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].range_C !== null && rescue_taratura[0].range_C !== undefined && rescue_taratura[0].pt_int_C !== ''">RANGE_C</th>
+
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].pt_int_D !== null && rescue_taratura[0].pt_int_D !== undefined && rescue_taratura[0].pt_int_D !== ''">PT. INT. D</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].calibrazione_D !== null && rescue_taratura[0].calibrazione_D !== undefined && rescue_taratura[0].pt_int_D !== ''">CALIB. D</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].calibrazione_D !== null && rescue_taratura[0].calibrazione_D !== undefined && rescue_taratura[0].calibrazione_D !== 'No' && rescue_taratura[0].pt_int_D !== ''">VAL_CALIB_D</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].calibrazione_D !== null && rescue_taratura[0].calibrazione_D !== undefined && rescue_taratura[0].calibrazione_D !== 'No' && rescue_taratura[0].pt_int_D !== ''">VAL_CALIB_MASTER_D</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y1_strum_D !== null && rescue_taratura[0].y1_strum_D !== undefined && rescue_taratura[0].pt_int_D !== ''">Y1_STRUM_D</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y1_master_D !== null && rescue_taratura[0].y1_master_D !== undefined && rescue_taratura[0].pt_int_D !== ''">Y1_MASTER_D</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y2_strum_D !== null && rescue_taratura[0].y2_strum_D !== undefined && rescue_taratura[0].pt_int_D !== ''">Y2_STRUM_D</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y2_master_D !== null && rescue_taratura[0].y2_strum_D !== undefined && rescue_taratura[0].pt_int_D !== ''">Y2_MASTER_D</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y3_strum_D !== null && rescue_taratura[0].y3_strum_D !== undefined && rescue_taratura[0].pt_int_D !== ''">Y3_STRUM_D</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y3_master_D !== null && rescue_taratura[0].y3_master_D !== undefined && rescue_taratura[0].pt_int_D !== ''">Y3_MASTER_D</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y4_strum_D !== null && rescue_taratura[0].y4_strum_D !== undefined && rescue_taratura[0].pt_int_D !== ''">Y4_STRUM_D</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y4_master_D !== null && rescue_taratura[0].y4_master_D !== undefined && rescue_taratura[0].pt_int_D !== ''">Y4_MASTER_D</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y5_strum_D !== null && rescue_taratura[0].y5_strum_D !== undefined && rescue_taratura[0].pt_int_D !== ''">Y5_STRUM_D</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y5_master_D !== null && rescue_taratura[0].y5_master_D !== undefined && rescue_taratura[0].pt_int_D !== ''">Y5_MASTER_D</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].avg_x_D !== null && rescue_taratura[0].avg_x_D !== undefined && rescue_taratura[0].pt_int_D !== ''">AVG_x_D</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].range_D !== null && rescue_taratura[0].range_D !== undefined  && rescue_taratura[0].pt_int_D !== ''">RANGE_D</th>
+
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].pt_int_E !== null && rescue_taratura[0].pt_int_E !== undefined && rescue_taratura[0].pt_int_E !== ''">PT. INT. E</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].calibrazione_E !== null && rescue_taratura[0].calibrazione_E !== undefined && rescue_taratura[0].pt_int_E !== ''">CALIB. E</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].calibrazione_E !== null && rescue_taratura[0].calibrazione_E !== undefined && rescue_taratura[0].calibrazione_E !== 'No' && rescue_taratura[0].pt_int_E !== ''">VAL_CALIB_E</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].calibrazione_E !== null && rescue_taratura[0].calibrazione_E !== undefined && rescue_taratura[0].calibrazione_E !== 'No' && rescue_taratura[0].pt_int_E !== ''">VAL_CALIB_MASTER_E</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y1_strum_E !== null && rescue_taratura[0].y1_strum_E !== undefined && rescue_taratura[0].pt_int_E !== ''">Y1_STRUM_E</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y1_master_E !== null && rescue_taratura[0].y1_master_E !== undefined && rescue_taratura[0].pt_int_E !== ''">Y1_MASTER_E</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y2_strum_E !== null && rescue_taratura[0].pt_int_E !== undefined && rescue_taratura[0].pt_int_E !== ''">Y2_STRUM_E</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y2_master_E !== null && rescue_taratura[0].y2_master_E !== undefined && rescue_taratura[0].pt_int_E !== ''">Y2_MASTER_E</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y3_strum_E !== null && rescue_taratura[0].y3_strum_E !== undefined && rescue_taratura[0].pt_int_E !== ''">Y3_STRUM_E</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y3_master_E !== null && rescue_taratura[0].y3_master_E!== undefined && rescue_taratura[0].pt_int_E !== ''">Y3_MASTER_E</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y4_strum_E !== null && rescue_taratura[0].y4_strum_E !== undefined && rescue_taratura[0].pt_int_E !== ''">Y4_STRUM_E</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y4_master_E !== null && rescue_taratura[0].y4_master_E !== undefined && rescue_taratura[0].pt_int_E !== ''">Y4_MASTER_E</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y5_strum_E !== null && rescue_taratura[0].y5_strum_E !== undefined && rescue_taratura[0].pt_int_E !== ''">Y5_STRUM_E</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y5_master_E !== null && rescue_taratura[0].y5_master_E !== undefined && rescue_taratura[0].pt_int_E !== ''">Y5_MASTER_E</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].avg_x_E !== null && rescue_taratura[0].avg_x_E !== undefined && rescue_taratura[0].pt_int_E !== ''">AVG_x_E</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].range_E !== null && rescue_taratura[0].range_E !== undefined && rescue_taratura[0].pt_int_E !== ''">RANGE_E</th>
+
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].pt_int_F !== null && rescue_taratura[0].pt_int_F !== undefined && rescue_taratura[0].pt_int_F !== ''">PT. INT. F</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].calibrazione_F !== null && rescue_taratura[0].calibrazione_F !== undefined && rescue_taratura[0].pt_int_F !== ''">CALIB. F</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].calibrazione_F !== null && rescue_taratura[0].calibrazione_F !== undefined && rescue_taratura[0].calibrazione_F !== 'No' && rescue_taratura[0].pt_int_F !== ''">VAL_CALIB_F</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].calibrazione_F !== null && rescue_taratura[0].calibrazione_F !== undefined && rescue_taratura[0].calibrazione_F !== 'No' && rescue_taratura[0].pt_int_F !== ''">VAL_CALIB_MASTER_F</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y1_strum_F !== null && rescue_taratura[0].y1_strum_F !== undefined && rescue_taratura[0].pt_int_F !== ''">Y1_STRUM_F</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y1_master_F !== null && rescue_taratura[0].y1_master_F !== undefined && rescue_taratura[0].pt_int_F !== ''">Y1_MASTER_F</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y2_strum_F !== null && rescue_taratura[0].y2_strum_F !== undefined && rescue_taratura[0].pt_int_F !== ''">Y2_STRUM_F</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y2_master_F !== null && rescue_taratura[0].y2_master_F !== undefined && rescue_taratura[0].pt_int_F !== ''">Y2_MASTER_F</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y3_strum_F !== null && rescue_taratura[0].y3_strum_F !== undefined && rescue_taratura[0].pt_int_F !== ''">Y3_STRUM_F</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y3_master_F !== null && rescue_taratura[0].y3_master_F !== undefined && rescue_taratura[0].pt_int_F !== ''">Y3_MASTER_F</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y4_strum_F !== null && rescue_taratura[0].y4_strum_F !== undefined && rescue_taratura[0].pt_int_F !== ''">Y4_STRUM_F</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y4_master_F !== null && rescue_taratura[0].y4_master_F !== undefined && rescue_taratura[0].pt_int_F !== ''">Y4_MASTER_F</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].y5_strum_F !== null && rescue_taratura[0].y5_strum_F !== undefined && rescue_taratura[0].pt_int_F !== ''">Y5_STRUM_F</th>
+            <th nzWidth="110px" *ngIf="rescue_taratura[0].y5_master_F !== null && rescue_taratura[0].y5_master_F !== undefined && rescue_taratura[0].pt_int_F !== ''">Y5_MASTER_F</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].avg_x_F !== null && rescue_taratura[0].avg_x_F !== undefined && rescue_taratura[0].pt_int_F !== ''">AVG_x_F</th>
+            <th nzWidth="100px" *ngIf="rescue_taratura[0].range_F !== null && rescue_taratura[0].range_F !== undefined && rescue_taratura[0].pt_int_F !== ''">RANGE_F</th>
+
+            <th nzWidth="100px">NOTE</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let data of nzTable.data">
+            <td *ngIf="data.data_validazione != ''">
+              <a nz-popconfirm nzPopconfirmTitle="Sei sicuro di confermare la taratura?" (nzOnConfirm)="confermaMetrologica(data)">CONFERMA</a>
+              <a class="elimina" nz-popconfirm nzPopconfirmTitle="Sei sicuro di eliminare la taratura?" (nzOnConfirm)="eliminaMetrologica(data)">ELIMINA</a>
+            </td>
+            <td *ngIf="data.data_validazione == ''">
+              CONFERMA
+              <a class="elimina" nz-popconfirm nzPopconfirmTitle="Sei sicuro di eliminare la taratura?" (nzOnConfirm)="eliminaMetrologica(data)">ELIMINA</a>
+            </td>
+            <td>{{data.cod_miq }}</td>
+            <td>
+              <nz-date-picker
+                [(ngModel)]="data.data_validazione"
+                [(ngModel)]="data_validazione" (ngModelChange)="modelChanged($event)"
+                [nzFormat]="'dd-MM-yyyy'"
+              ></nz-date-picker>
+            </td>
+            <td>{{ data.data | date:'dd-MM-yyyy'}}</td>
+
+            <td *ngIf="rescue_taratura[0].y_integrita != null">{{ data.y_integrita }}</td>
+            <td *ngIf="rescue_taratura[0].y_conformita != null">{{ data.y_conformita }}</td>
+
+            <td *ngIf="rescue_taratura[0].y_rif !== null">{{ data.y_rif }}</td>
+            <td *ngIf="rescue_taratura[0].T_pre !== null">{{ data.T_pre }}</td>
+            <td *ngIf="rescue_taratura[0].LSC_x !== null">{{ data.LSC_x }}</td>
+            <td *ngIf="rescue_taratura[0].LIC_x !== null">{{ data.LIC_x }}</td>
+            <td *ngIf="rescue_taratura[0].LSC_r !== null">{{ data.LSC_r }}</td>
+            <td *ngIf="rescue_taratura[0].LIC_r !== null">{{ data.LIC_r }}</td>
+
+            <td *ngIf="rescue_taratura[0].pt_int_A !== null && rescue_taratura[0].pt_int_A !== undefined && rescue_taratura[0].pt_int_A !== ''">{{ data.pt_int_A }}</td>
+            <td *ngIf="rescue_taratura[0].calibrazione_A !== null && rescue_taratura[0].calibrazione_A !== undefined && rescue_taratura[0].pt_int_A !== ''">{{ data.calibrazione_A }}</td>
+            <td *ngIf="rescue_taratura[0].val_calib_A !== null && rescue_taratura[0].val_calib_A !== undefined && rescue_taratura[0].calibrazione_A !== 'No' && rescue_taratura[0].pt_int_A !== ''">{{ data.val_calib_A }}</td>
+            <td *ngIf="rescue_taratura[0].val_calib_master_A !== null && rescue_taratura[0].val_calib_master_A !== undefined && rescue_taratura[0].calibrazione_A !== 'No' && rescue_taratura[0].pt_int_A !== ''">{{ data.val_calib_master_A }}</td>
+            <td *ngIf="rescue_taratura[0].y1_strum_A !== null && rescue_taratura[0].y1_strum_A !== undefined && rescue_taratura[0].pt_int_A !== ''">{{ data.y1_strum_A }}</td>
+            <td *ngIf="rescue_taratura[0].y1_master_A !== null && rescue_taratura[0].y1_master_A !== undefined && rescue_taratura[0].pt_int_A !== ''">{{ data.y1_master_A }}</td>
+            <td *ngIf="rescue_taratura[0].y2_strum_A !== null && rescue_taratura[0].y2_strum_A !== undefined && rescue_taratura[0].pt_int_A !== ''">{{ data.y2_strum_A }}</td>
+            <td *ngIf="rescue_taratura[0].y2_master_A !== null && rescue_taratura[0].y2_master_A !== undefined && rescue_taratura[0].pt_int_A !== ''">{{ data.y2_strum_A }}</td>
+            <td *ngIf="rescue_taratura[0].y3_strum_A !== null && rescue_taratura[0].y3_strum_A !== undefined && rescue_taratura[0].pt_int_A !== ''">{{ data.y3_strum_A }}</td>
+            <td *ngIf="rescue_taratura[0].y3_master_A !== null && rescue_taratura[0].y3_master_A !== undefined && rescue_taratura[0].pt_int_A !== ''">{{ data.y3_master_A }}</td>
+            <td *ngIf="rescue_taratura[0].y4_strum_A !== null && rescue_taratura[0].y4_strum_A !== undefined && rescue_taratura[0].pt_int_A !== ''">{{ data.y4_strum_A }}</td>
+            <td *ngIf="rescue_taratura[0].y4_master_A !== null && rescue_taratura[0].y4_master_A !== undefined && rescue_taratura[0].pt_int_A !== ''">{{ data.y4_master_A }}</td>
+            <td *ngIf="rescue_taratura[0].y5_strum_A !== null && rescue_taratura[0].y5_strum_A !== undefined && rescue_taratura[0].pt_int_A !== ''">{{ data.y5_strum_A }}</td>
+            <td *ngIf="rescue_taratura[0].y5_master_A !== null && rescue_taratura[0].y5_master_A !== undefined && rescue_taratura[0].pt_int_A !== ''">{{ data.y5_master_A }}</td>
+            <td *ngIf="rescue_taratura[0].avg_x_A !== null && rescue_taratura[0].avg_x_A !== undefined && rescue_taratura[0].pt_int_A !== ''">{{ data.avg_x_A }}</td>
+            <td *ngIf="rescue_taratura[0].range_A !== null && rescue_taratura[0].range_A !== undefined && rescue_taratura[0].pt_int_A !== ''">{{ data.range_A }}</td>
+
+            <td *ngIf="rescue_taratura[0].pt_int_B !== null && rescue_taratura[0].pt_int_B !== undefined && rescue_taratura[0].pt_int_B !== ''">{{ data.pt_int_B }}</td>
+            <td *ngIf="rescue_taratura[0].calibrazione_B !== null && rescue_taratura[0].calibrazione_B !== undefined && rescue_taratura[0].pt_int_B !== ''">{{ data.calibrazione_B }}</td>
+            <td *ngIf="rescue_taratura[0].val_calib_B !== null && rescue_taratura[0].val_calib_B !== undefined && rescue_taratura[0].calibrazione_B !== 'No' && rescue_taratura[0].pt_int_B !== ''">{{ data.val_calib_B }}</td>
+            <td *ngIf="rescue_taratura[0].val_calib_master_B !== null && rescue_taratura[0].val_calib_master_B !== undefined && rescue_taratura[0].calibrazione_B !== 'No' && rescue_taratura[0].pt_int_B !== ''">{{ data.val_calib_master_B }}</td>
+            <td *ngIf="rescue_taratura[0].y1_strum_B !== null && rescue_taratura[0].y1_strum_B !== undefined && rescue_taratura[0].pt_int_B !== ''">{{ data.y1_strum_B }}</td>
+            <td *ngIf="rescue_taratura[0].y1_master_B !== null && rescue_taratura[0].y1_master_B !== undefined && rescue_taratura[0].pt_int_B !== ''">{{ data.y1_master_B }}</td>
+            <td *ngIf="rescue_taratura[0].y2_strum_B !== null && rescue_taratura[0].y2_strum_B !== undefined && rescue_taratura[0].pt_int_B !== ''">{{ data.y2_strum_B }}</td>
+            <td *ngIf="rescue_taratura[0].y2_master_B !== null && rescue_taratura[0].y2_master_B !== undefined && rescue_taratura[0].pt_int_B !== ''">{{ data.y2_strum_B }}</td>
+            <td *ngIf="rescue_taratura[0].y3_strum_B !== null && rescue_taratura[0].y3_strum_B !== undefined && rescue_taratura[0].pt_int_B !== ''">{{ data.y3_strum_B }}</td>
+            <td *ngIf="rescue_taratura[0].y3_master_B !== null && rescue_taratura[0].y3_master_B !== undefined && rescue_taratura[0].pt_int_B !== ''">{{ data.y3_master_B }}</td>
+            <td *ngIf="rescue_taratura[0].y4_strum_B !== null && rescue_taratura[0].y4_strum_B !== undefined && rescue_taratura[0].pt_int_B !== ''">{{ data.y4_strum_B }}</td>
+            <td *ngIf="rescue_taratura[0].y4_master_B !== null && rescue_taratura[0].y4_master_B !== undefined && rescue_taratura[0].pt_int_B !== ''">{{ data.y4_master_B }}</td>
+            <td *ngIf="rescue_taratura[0].y5_strum_B !== null && rescue_taratura[0].y5_strum_B !== undefined && rescue_taratura[0].pt_int_B !== ''">{{ data.y5_strum_B }}</td>
+            <td *ngIf="rescue_taratura[0].y5_master_B !== null && rescue_taratura[0].y5_master_B !== undefined && rescue_taratura[0].pt_int_B !== ''">{{ data.y5_master_B }}</td>
+            <td *ngIf="rescue_taratura[0].avg_x_B !== null && rescue_taratura[0].avg_x_B !== undefined && rescue_taratura[0].pt_int_B !== ''">{{ data.avg_x_B }}</td>
+            <td *ngIf="rescue_taratura[0].range_B !== null && rescue_taratura[0].range_B !== undefined && rescue_taratura[0].pt_int_B !== ''">{{ data.range_B }}</td>
+
+            <td *ngIf="rescue_taratura[0].pt_int_C !== null && rescue_taratura[0].pt_int_C !== undefined && rescue_taratura[0].pt_int_C !== ''">{{ data.pt_int_C }}</td>
+            <td *ngIf="rescue_taratura[0].calibrazione_C !== null && rescue_taratura[0].calibrazione_C !== undefined && rescue_taratura[0].pt_int_C !== ''">{{ data.calibrazione_C }}</td>
+            <td *ngIf="rescue_taratura[0].val_calib_C !== null && rescue_taratura[0].val_calib_C !== undefined && rescue_taratura[0].calibrazione_C !== 'No' && rescue_taratura[0].pt_int_C !== ''">{{ data.val_calib_C }}</td>
+            <td *ngIf="rescue_taratura[0].val_calib_master_C !== null && rescue_taratura[0].val_calib_master_C !== undefined && rescue_taratura[0].calibrazione_C !== 'No' && rescue_taratura[0].pt_int_C !== ''">{{ data.val_calib_master_C }}</td>
+            <td *ngIf="rescue_taratura[0].y1_strum_C !== null && rescue_taratura[0].y1_strum_C !== undefined && rescue_taratura[0].pt_int_C !== ''">{{ data.y1_strum_C }}</td>
+            <td *ngIf="rescue_taratura[0].y1_master_C !== null && rescue_taratura[0].y1_master_C !== undefined && rescue_taratura[0].pt_int_C !== ''">{{ data.y1_master_C }}</td>
+            <td *ngIf="rescue_taratura[0].y2_strum_C !== null && rescue_taratura[0].y2_strum_C !== undefined && rescue_taratura[0].pt_int_C !== ''">{{ data.y2_strum_C }}</td>
+            <td *ngIf="rescue_taratura[0].y2_master_C !== null && rescue_taratura[0].y2_master_C !== undefined && rescue_taratura[0].pt_int_C !== ''">{{ data.y2_strum_C }}</td>
+            <td *ngIf="rescue_taratura[0].y3_strum_C !== null && rescue_taratura[0].y3_strum_C !== undefined && rescue_taratura[0].pt_int_C !== ''">{{ data.y3_strum_C }}</td>
+            <td *ngIf="rescue_taratura[0].y3_master_C !== null && rescue_taratura[0].y3_master_C !== undefined && rescue_taratura[0].pt_int_C !== ''">{{ data.y3_master_C }}</td>
+            <td *ngIf="rescue_taratura[0].y4_strum_C !== null && rescue_taratura[0].y4_strum_C !== undefined && rescue_taratura[0].pt_int_C !== ''">{{ data.y4_strum_C }}</td>
+            <td *ngIf="rescue_taratura[0].y4_master_C !== null && rescue_taratura[0].y4_master_C !== undefined && rescue_taratura[0].pt_int_C !== ''">{{ data.y4_master_C }}</td>
+            <td *ngIf="rescue_taratura[0].y5_strum_C !== null && rescue_taratura[0].y5_strum_C !== undefined && rescue_taratura[0].pt_int_C !== ''">{{ data.y5_strum_C }}</td>
+            <td *ngIf="rescue_taratura[0].y5_master_C !== null && rescue_taratura[0].y5_master_C !== undefined && rescue_taratura[0].pt_int_C !== ''">{{ data.y5_master_C }}</td>
+            <td *ngIf="rescue_taratura[0].avg_x_C !== null && rescue_taratura[0].avg_x_C !== undefined && rescue_taratura[0].pt_int_C !== ''">{{ data.avg_x_C }}</td>
+            <td *ngIf="rescue_taratura[0].range_C !== null && rescue_taratura[0].range_C !== undefined && rescue_taratura[0].pt_int_C !== ''">{{ data.range_C }}</td>
+
+            <td *ngIf="rescue_taratura[0].pt_int_D !== null && rescue_taratura[0].pt_int_D !== undefined && rescue_taratura[0].pt_int_D !== ''">{{ data.pt_int_D }}</td>
+            <td *ngIf="rescue_taratura[0].calibrazione_D !== null && rescue_taratura[0].calibrazione_D !== undefined && rescue_taratura[0].pt_int_D !== ''">{{ data.calibrazione_D }}</td>
+            <td *ngIf="rescue_taratura[0].val_calib_D !== null && rescue_taratura[0].val_calib_D !== undefined && rescue_taratura[0].calibrazione_D !== 'No' && rescue_taratura[0].pt_int_D !== ''">{{ data.val_calib_D }}</td>
+            <td *ngIf="rescue_taratura[0].val_calib_master_D !== null && rescue_taratura[0].val_calib_master_D !== undefined && rescue_taratura[0].calibrazione_D !== 'No' && rescue_taratura[0].pt_int_D !== ''">{{ data.val_calib_master_D }}</td>
+            <td *ngIf="rescue_taratura[0].y1_strum_D !== null && rescue_taratura[0].y1_strum_D !== undefined && rescue_taratura[0].pt_int_D !== ''">{{ data.y1_strum_D }}</td>
+            <td *ngIf="rescue_taratura[0].y1_master_D !== null && rescue_taratura[0].y1_master_D !== undefined && rescue_taratura[0].pt_int_D !== ''">{{ data.y1_master_D }}</td>
+            <td *ngIf="rescue_taratura[0].y2_strum_D !== null && rescue_taratura[0].y2_strum_D !== undefined && rescue_taratura[0].pt_int_D !== ''">{{ data.y2_strum_D }}</td>
+            <td *ngIf="rescue_taratura[0].y2_master_D !== null && rescue_taratura[0].y2_master_D !== undefined && rescue_taratura[0].pt_int_D !== ''">{{ data.y2_strum_D }}</td>
+            <td *ngIf="rescue_taratura[0].y3_strum_D !== null && rescue_taratura[0].y3_strum_D !== undefined && rescue_taratura[0].pt_int_D !== ''">{{ data.y3_strum_D }}</td>
+            <td *ngIf="rescue_taratura[0].y3_master_D !== null && rescue_taratura[0].y3_master_D !== undefined && rescue_taratura[0].pt_int_D !== ''">{{ data.y3_master_D }}</td>
+            <td *ngIf="rescue_taratura[0].y4_strum_D !== null && rescue_taratura[0].y4_strum_D !== undefined && rescue_taratura[0].pt_int_D !== ''">{{ data.y4_strum_D }}</td>
+            <td *ngIf="rescue_taratura[0].y4_master_D !== null && rescue_taratura[0].y4_master_D !== undefined && rescue_taratura[0].pt_int_D !== ''">{{ data.y4_master_D }}</td>
+            <td *ngIf="rescue_taratura[0].y5_strum_D !== null && rescue_taratura[0].y5_strum_D !== undefined && rescue_taratura[0].pt_int_D !== ''">{{ data.y5_strum_D }}</td>
+            <td *ngIf="rescue_taratura[0].y5_master_D !== null && rescue_taratura[0].y5_master_D !== undefined && rescue_taratura[0].pt_int_D !== ''">{{ data.y5_master_D }}</td>
+            <td *ngIf="rescue_taratura[0].avg_x_D !== null && rescue_taratura[0].avg_x_D !== undefined && rescue_taratura[0].pt_int_D !== ''">{{ data.avg_x_D }}</td>
+            <td *ngIf="rescue_taratura[0].range_D !== null && rescue_taratura[0].range_D !== undefined && rescue_taratura[0].pt_int_D !== ''">{{ data.range_D }}</td>
+
+            <td *ngIf="rescue_taratura[0].pt_int_E !== null && rescue_taratura[0].pt_int_E !== undefined && rescue_taratura[0].pt_int_E !== ''">{{ data.pt_int_E }}</td>
+            <td *ngIf="rescue_taratura[0].calibrazione_E !== null && rescue_taratura[0].calibrazione_E !== undefined && rescue_taratura[0].pt_int_E !== ''">{{ data.calibrazione_E }}</td>
+            <td *ngIf="rescue_taratura[0].val_calib_E !== null && rescue_taratura[0].val_calib_E !== undefined && rescue_taratura[0].calibrazione_E !== 'No' && rescue_taratura[0].pt_int_E !== ''">{{ data.val_calib_E }}</td>
+            <td *ngIf="rescue_taratura[0].val_calib_master_E !== null && rescue_taratura[0].val_calib_master_E !== undefined && rescue_taratura[0].calibrazione_E !== 'No' && rescue_taratura[0].pt_int_E !== ''">{{ data.val_calib_master_E }}</td>
+            <td *ngIf="rescue_taratura[0].y1_strum_E !== null && rescue_taratura[0].y1_strum_E !== undefined && rescue_taratura[0].pt_int_E !== ''">{{ data.y1_strum_E }}</td>
+            <td *ngIf="rescue_taratura[0].y1_master_E !== null && rescue_taratura[0].y1_master_E !== undefined && rescue_taratura[0].pt_int_E !== ''">{{ data.y1_master_E }}</td>
+            <td *ngIf="rescue_taratura[0].y2_strum_E !== null && rescue_taratura[0].y2_strum_E !== undefined && rescue_taratura[0].pt_int_E !== ''">{{ data.y2_strum_E }}</td>
+            <td *ngIf="rescue_taratura[0].y2_master_E !== null && rescue_taratura[0].y2_master_E !== undefined && rescue_taratura[0].pt_int_E !== ''">{{ data.y2_strum_E }}</td>
+            <td *ngIf="rescue_taratura[0].y3_strum_E !== null && rescue_taratura[0].y3_strum_E !== undefined && rescue_taratura[0].pt_int_E !== ''">{{ data.y3_strum_E }}</td>
+            <td *ngIf="rescue_taratura[0].y3_master_E !== null && rescue_taratura[0].y3_master_E !== undefined && rescue_taratura[0].pt_int_E !== ''">{{ data.y3_master_E }}</td>
+            <td *ngIf="rescue_taratura[0].y4_strum_E !== null && rescue_taratura[0].y4_strum_E !== undefined && rescue_taratura[0].pt_int_E !== ''">{{ data.y4_strum_E }}</td>
+            <td *ngIf="rescue_taratura[0].y4_master_E !== null && rescue_taratura[0].y4_master_E !== undefined && rescue_taratura[0].pt_int_E !== ''">{{ data.y4_master_E }}</td>
+            <td *ngIf="rescue_taratura[0].y5_strum_E !== null && rescue_taratura[0].y5_strum_E !== undefined && rescue_taratura[0].pt_int_E !== ''">{{ data.y5_strum_E }}</td>
+            <td *ngIf="rescue_taratura[0].y5_master_E !== null && rescue_taratura[0].y5_master_E !== undefined && rescue_taratura[0].pt_int_E !== ''">{{ data.y5_master_E }}</td>
+            <td *ngIf="rescue_taratura[0].avg_x_E !== null && rescue_taratura[0].avg_x_E !== undefined && rescue_taratura[0].pt_int_E !== ''">{{ data.avg_x_E }}</td>
+            <td *ngIf="rescue_taratura[0].range_E !== null && rescue_taratura[0].range_E !== undefined && rescue_taratura[0].pt_int_E !== ''">{{ data.range_E }}</td>
+
+            <td *ngIf="rescue_taratura[0].pt_int_F !== null && rescue_taratura[0].pt_int_F !== undefined && rescue_taratura[0].pt_int_F !== ''">{{ data.pt_int_F }}</td>
+            <td *ngIf="rescue_taratura[0].calibrazione_F !== null && rescue_taratura[0].calibrazione_F !== undefined && rescue_taratura[0].pt_int_F !== ''">{{ data.calibrazione_F }}</td>
+            <td *ngIf="rescue_taratura[0].val_calib_F !== null && rescue_taratura[0].val_calib_F !== undefined && rescue_taratura[0].calibrazione_F !== 'No' && rescue_taratura[0].pt_int_F !== ''">{{ data.val_calib_F }}</td>
+            <td *ngIf="rescue_taratura[0].val_calib_master_F !== null && rescue_taratura[0].val_calib_master_F !== undefined && rescue_taratura[0].calibrazione_F !== 'No' && rescue_taratura[0].pt_int_F !== ''">{{ data.val_calib_master_F }}</td>
+            <td *ngIf="rescue_taratura[0].y1_strum_F !== null && rescue_taratura[0].y1_strum_F !== undefined && rescue_taratura[0].pt_int_F !== ''">{{ data.y1_strum_F }}</td>
+            <td *ngIf="rescue_taratura[0].y1_master_F !== null && rescue_taratura[0].y1_master_F !== undefined && rescue_taratura[0].pt_int_F !== ''">{{ data.y1_master_F }}</td>
+            <td *ngIf="rescue_taratura[0].y2_strum_F !== null && rescue_taratura[0].y2_strum_F !== undefined && rescue_taratura[0].pt_int_F !== ''">{{ data.y2_strum_F }}</td>
+            <td *ngIf="rescue_taratura[0].y2_master_F !== null && rescue_taratura[0].y2_master_F !== undefined && rescue_taratura[0].pt_int_F !== ''">{{ data.y2_strum_F }}</td>
+            <td *ngIf="rescue_taratura[0].y3_strum_F !== null && rescue_taratura[0].y3_strum_F !== undefined && rescue_taratura[0].pt_int_F !== ''">{{ data.y3_strum_F }}</td>
+            <td *ngIf="rescue_taratura[0].y3_master_F !== null && rescue_taratura[0].y3_master_F !== undefined && rescue_taratura[0].pt_int_F !== ''">{{ data.y3_master_F }}</td>
+            <td *ngIf="rescue_taratura[0].y4_strum_F !== null && rescue_taratura[0].y4_strum_F !== undefined && rescue_taratura[0].pt_int_F !== ''">{{ data.y4_strum_F }}</td>
+            <td *ngIf="rescue_taratura[0].y4_master_F !== null && rescue_taratura[0].y4_master_F !== undefined && rescue_taratura[0].pt_int_F !== ''">{{ data.y4_master_F }}</td>
+            <td *ngIf="rescue_taratura[0].y5_strum_F !== null && rescue_taratura[0].y5_strum_F !== undefined && rescue_taratura[0].pt_int_F !== ''">{{ data.y5_strum_F }}</td>
+            <td *ngIf="rescue_taratura[0].y5_master_F !== null && rescue_taratura[0].y5_master_F !== undefined && rescue_taratura[0].pt_int_F !== ''">{{ data.y5_master_F }}</td>
+            <td *ngIf="rescue_taratura[0].avg_x_F !== null && rescue_taratura[0].avg_x_F !== undefined && rescue_taratura[0].pt_int_F !== ''">{{ data.avg_x_F }}</td>
+            <td *ngIf="rescue_taratura[0].range_F !== null && rescue_taratura[0].range_F !== undefined && rescue_taratura[0].pt_int_F !== ''">{{ data.range_F }}</td>
+
+            <td>{{ data.note }}</td>
+          </tr>
+        </tbody>
+      </nz-table>
+      <h1 *ngIf="data_validazione">Nuova scadenza: {{calculateDueDate()}}, Week: {{calculateDueWeek()}}</h1>
+      </ng-template>
+      <ng-template #modalFooter>
+      </ng-template>
+
+    </nz-modal>
+
+
+
+    <nz-dropdown-menu #menu_cod_miq="nzDropdownMenu" >
+      <div class="ant-table-filter-dropdown">
+        <div class="search-box">
+          <input type="text" nz-input placeholder="Cerca cod MIQ" [(ngModel)]="searchValue_cod_miq" oninput="this.value = this.value.toUpperCase()" (keyup.enter)="search_cod_miq()" maxlength="7"/>
+          <button nz-button  nzSize="small" (click)="search_cod_miq()" class="search-button">Cerca</button>
+          <button nz-button nzSize="small" (click)="reset_cod_miq()">Reset</button>
+        </div>
+      </div>
+    </nz-dropdown-menu>
+
+    <nz-dropdown-menu #menu_denominazione="nzDropdownMenu" >
+      <div class="ant-table-filter-dropdown" style="width: 270px">
+        <div class="search-box">
+          <input type="text" nz-input placeholder="Cerca denominazione strumento" [(ngModel)]="searchValue_denominazione" oninput="this.value" (keyup.enter)="search_denominazione()" style="width: 250px"/>
+          <button nz-button  nzSize="small" (click)="search_denominazione()" class="search-button" style="width: 120px">Cerca</button>
+          <button nz-button nzSize="small" (click)="reset_denominazione()" style="width: 120px">Reset</button>
+        </div>
+      </div>
+    </nz-dropdown-menu>
+
+    <nz-dropdown-menu #menu_addetto="nzDropdownMenu" >
+      <div class="ant-table-filter-dropdown">
+        <div class="search-box">
+          <input type="text" nz-input placeholder="Cerca addetto taratura" [(ngModel)]="searchValue_addetto" oninput="this.value" (keyup.enter)="search_addetto()"/>
+          <button nz-button  nzSize="small" (click)="search_addetto()" class="search-button">Cerca</button>
+          <button nz-button nzSize="small" (click)="reset_addetto()">Reset</button>
+        </div>
+      </div>
+    </nz-dropdown-menu>
+
+    <nz-dropdown-menu #menu_localizzazione="nzDropdownMenu" >
+      <div class="ant-table-filter-dropdown">
+        <div class="search-box">
+          <input type="text" nz-input placeholder="Cerca localizzazione" [(ngModel)]="searchValue_localizzazione" oninput="this.value" (keyup.enter)="search_localizzazione()"/>
+          <button nz-button  nzSize="small" (click)="search_localizzazione()" class="search-button">Cerca</button>
+          <button nz-button nzSize="small" (click)="reset_localizzazione()">Reset</button>
+        </div>
+      </div>
+    </nz-dropdown-menu>
+
+  </div>
+  </div>

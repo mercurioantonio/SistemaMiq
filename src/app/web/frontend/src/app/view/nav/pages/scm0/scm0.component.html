@@ -1,0 +1,307 @@
+<ng-container >
+    <!-- <input type="text" [(ngModel)]="selectedProduct"> -->
+  <form nz-form nzLayout="vertical" [nzAutoTips]="autoTips" [formGroup]="validateForm" (keydown.enter)="$event.preventDefault()">
+    <nz-form-item >
+      <nz-form-label nzRequired>Codice MIQ: </nz-form-label>
+      <nz-form-control>
+        <input nz-input [(ngModel)]="selectedMiq" formControlName="cod_miq" [readonly]="true" style="width: 270px;"/> 
+      </nz-form-control>
+    </nz-form-item>  
+    
+    <div *ngIf="status == 'success'" class="anagrafica">
+      <nz-descriptions class="description_title" nzTitle="Anagrafica MIQ" nzBordered *ngIf="dataframeData">
+        <nz-descriptions-item nzTitle="Denominazione strumento" [nzSpan]="2">{{dataframeData.denominazione_strumento}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Scheda di controllo MIQ" [nzSpan]="0.5">{{dataframeData.scm}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Classe" [nzSpan]="0.5">{{dataframeData.classe}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Data ultima taratura">{{dataframeData.data_ult_tarat | date:'dd-MM-yyyy'}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Settimana scadenza">{{dataframeData.settimana_scadenza}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Anno scadenza">{{dataframeData.anno_scadenza}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Unità di misura">{{dataframeData.unita_di_misura}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Risoluzione">{{dataframeData.risoluzione}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Incertezza">{{dataframeData.incertezza}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Frequenza di taratura" [nzSpan]="1.5">{{dataframeData.intervallo_di_taratura}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Campione di riferimento" [nzSpan]="0.75"><a (click)="campione(dataframeData.campione_di_riferimento)">{{dataframeData.campione_di_riferimento}}</a></nz-descriptions-item>
+        <nz-descriptions-item nzTitle="SOT" [nzSpan]="0.75">{{dataframeData.sot}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Toll. tecnica stabilità" [nzSpan]="1.5">{{dataframeData.toll_tecnica_stabilita}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Toll. tecnica ripetibilità" [nzSpan]="1.5">{{dataframeData.toll_tecnica_ripetibilita}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Responsabile taratura" [nzSpan]="1.5">{{dataframeData.responsabile_taratura}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Addetto taratura" [nzSpan]="1.5">{{dataframeData.addetto_taratura}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="N° revisione" [nzSpan]="1.5">{{dataframeData.revisione}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Data revisione" [nzSpan]="1.5">{{dataframeData.data_revisione}}</nz-descriptions-item>
+      </nz-descriptions>
+    </div>
+
+    <nz-modal *ngIf="status_campione" [(nzVisible)]="status_campione" [nzTitle]="modalTitle"   [nzContent]="modalContent" [nzFooter]="modalFooter" (nzOnCancel)="handleOkCampione()" (nzOnCancel)="handleOkCampione()" [nzWidth]="1000" [nzCentered]="true">
+      <ng-template #modalTitle>Campione di riferimento</ng-template>
+      <ng-template #modalContent>
+        <nz-descriptions class="description_title" nzTitle="{{dataframeCampione[0].cod_miq}}" nzBordered *ngIf="dataframeCampione[0]">
+          <nz-descriptions-item nzTitle="N° certificato" [nzSpan]="3">{{dataframeCampione[0].n_cert}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Scadenza" [nzSpan]="1">{{dataframeCampione[0].scadenza | date:'dd-MM-yyyy'}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Settimana scadenza" [nzSpan]="1">{{dataframeCampione[0].settimana_scadenza}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Anno scadenza" [nzSpan]="1">{{dataframeCampione[0].anno_scadenza}}</nz-descriptions-item>
+        </nz-descriptions>
+        <br>
+        <nz-descriptions class="description_title" nzTitle="{{dataframeCampione[1].cod_miq}}" nzBordered *ngIf="dataframeCampione[1]">
+          <nz-descriptions-item nzTitle="N° certificato" [nzSpan]="3">{{dataframeCampione[1].n_cert}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Scadenza" [nzSpan]="1">{{dataframeCampione[1].scadenza | date:'dd-MM-yyyy'}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Settimana scadenza" [nzSpan]="1">{{dataframeCampione[1].settimana_scadenza}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Anno scadenza" [nzSpan]="1">{{dataframeCampione[1].anno_scadenza}}</nz-descriptions-item>
+        </nz-descriptions>
+        <br>
+        <nz-descriptions class="description_title" nzTitle="{{dataframeCampione[2].cod_miq}}" nzBordered *ngIf="dataframeCampione[2]">
+          <nz-descriptions-item nzTitle="N° certificato" [nzSpan]="3">{{dataframeCampione[2].n_cert}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Scadenza" [nzSpan]="1">{{dataframeCampione[2].scadenza | date:'dd-MM-yyyy'}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Settimana scadenza" [nzSpan]="1">{{dataframeCampione[2].settimana_scadenza}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Anno scadenza" [nzSpan]="1">{{dataframeCampione[2].anno_scadenza}}</nz-descriptions-item>
+        </nz-descriptions>
+        <br>
+        <nz-descriptions class="description_title" nzTitle="{{dataframeCampione[3].cod_miq}}" nzBordered *ngIf="dataframeCampione[3]">
+          <nz-descriptions-item nzTitle="N° certificato" [nzSpan]="3">{{dataframeCampione[3].n_cert}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Scadenza" [nzSpan]="1">{{dataframeCampione[3].scadenza | date:'dd-MM-yyyy'}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Settimana scadenza" [nzSpan]="1">{{dataframeCampione[3].settimana_scadenza}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Anno scadenza" [nzSpan]="1">{{dataframeCampione[3].anno_scadenza}}</nz-descriptions-item>
+        </nz-descriptions>
+        <br>
+        <nz-descriptions class="description_title" nzTitle="{{dataframeCampione[4].cod_miq}}" nzBordered *ngIf="dataframeCampione[4]">
+          <nz-descriptions-item nzTitle="N° certificato" [nzSpan]="3">{{dataframeCampione[4].n_cert}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Scadenza" [nzSpan]="1">{{dataframeCampione[4].scadenza | date:'dd-MM-yyyy'}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Settimana scadenza" [nzSpan]="1">{{dataframeCampione[4].settimana_scadenza}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Anno scadenza" [nzSpan]="1">{{dataframeCampione[4].anno_scadenza}}</nz-descriptions-item>
+        </nz-descriptions>
+      </ng-template>
+      <ng-template #modalFooter>
+          <button nz-button nzType="primary" (click)="handleOkCampione()">Chiudi</button>
+      </ng-template>
+    </nz-modal>
+  
+  
+    <div *ngIf="status == 'failed'">
+      <nz-alert
+      nzType="error"
+      nzMessage="Errore"
+      nzDescription="Nessuno strumento di misurazione corrispondente"
+      nzShowIcon
+    ></nz-alert>
+    </div>
+
+    <div nz-row class="hidden">
+      <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>SCM</nz-form-label>
+            <nz-form-control>
+              <input [(ngModel)]="scm"  formControlName="scm" style="width: 270px;"/>
+            </nz-form-control>
+          </nz-form-item>
+      </div>
+      <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>SCM</nz-form-label>
+            <nz-form-control>
+              <input [(ngModel)]="toll_tecnica_stabilita"  formControlName="toll_tecnica_stabilita" style="width: 270px;"/>
+            </nz-form-control>
+          </nz-form-item>
+      </div>
+      <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>SCM</nz-form-label>
+            <nz-form-control>
+              <input [(ngModel)]="toll_tecnica_ripetibilita"  formControlName="toll_tecnica_ripetibilita" style="width: 270px;"/>
+            </nz-form-control>
+          </nz-form-item>
+      </div>
+
+      <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>SCM</nz-form-label>
+            <nz-form-control>
+              <input [(ngModel)]="y_rif"  formControlName="y_rif" style="width: 270px;"/>
+            </nz-form-control>
+          </nz-form-item>
+      </div>
+      <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>SCM</nz-form-label>
+            <nz-form-control>
+              <input [(ngModel)]="T_pre"  formControlName="T_pre" style="width: 270px;"/>
+            </nz-form-control>
+          </nz-form-item>
+      </div>
+
+      <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>SCM</nz-form-label>
+            <nz-form-control>
+              <input [(ngModel)]="pt_int_A"  formControlName="pt_int_A" style="width: 270px;"/>
+            </nz-form-control>
+          </nz-form-item>
+      </div>
+      <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>SCM</nz-form-label>
+            <nz-form-control>
+              <input [(ngModel)]="pt_int_B"  formControlName="pt_int_B" style="width: 270px;"/>
+            </nz-form-control>
+          </nz-form-item>
+      </div>
+      <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>SCM</nz-form-label>
+            <nz-form-control>
+              <input [(ngModel)]="pt_int_C"  formControlName="pt_int_C" style="width: 270px;"/>
+            </nz-form-control>
+          </nz-form-item>
+      </div>
+      <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>SCM</nz-form-label>
+            <nz-form-control>
+              <input [(ngModel)]="pt_int_D"  formControlName="pt_int_D" style="width: 270px;"/>
+            </nz-form-control>
+          </nz-form-item>
+      </div>
+      <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>SCM</nz-form-label>
+            <nz-form-control>
+              <input [(ngModel)]="pt_int_E"  formControlName="pt_int_E" style="width: 270px;"/>
+            </nz-form-control>
+          </nz-form-item>
+      </div>
+      <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>SCM</nz-form-label>
+            <nz-form-control>
+              <input [(ngModel)]="pt_int_F"  formControlName="pt_int_F" style="width: 270px;"/>
+            </nz-form-control>
+          </nz-form-item>
+      </div>
+    </div> 
+  
+    <div nz-row>
+          <div nz-col nzSpan="4">
+            <nz-form-item>
+                <nz-form-label [nzSm]="100" nzRequired>Data taratura</nz-form-label>
+                <nz-form-control>
+                  <nz-date-picker nzFormat="dd-MM-yyyy" [(ngModel)]="data"  (ngModelChange)="data = $event"formControlName="data" style="width: 270px;"></nz-date-picker>
+                </nz-form-control>
+              </nz-form-item>
+          </div>
+          <div style="width: 100px;"></div>
+          <div nz-col nzSpan="4">
+            <nz-form-item>
+              <nz-form-label nzRequired>N° certificato</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="n_cert"/>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+    </div>
+
+    <div nz-row>
+          <div nz-col nzSpan="4">
+            <nz-form-item>
+              <nz-form-label nzRequired>Incertezza</nz-form-label>
+              <nz-form-control >
+                <input nz-input formControlName="incertezza"/>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+    </div>
+    <div nz-row>
+          <div nz-col nzSpan="4">
+            <nz-form-item>
+              <nz-form-label nzRequired>N° revisione</nz-form-label>
+              <nz-form-control >
+                <input nz-input formControlName="revisione" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div style="width: 100px;"></div>
+          <div nz-col nzSpan="4">
+            <nz-form-item>
+                <nz-form-label [nzSm]="100" nzRequired>Data revisione</nz-form-label>
+                <nz-form-control>
+                  <input nz-input formControlName="data_revisione" />
+                </nz-form-control>
+              </nz-form-item>
+          </div>
+      </div>
+
+      <div nz-row>
+        <div nz-col nzSpan="4">
+          <nz-form-item>
+            <nz-form-label >Punto d'interesse 1</nz-form-label>
+            <nz-form-control >
+              <input nz-input formControlName="pt_int_A" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col nzSpan="4">
+          <nz-form-item>
+              <nz-form-label  >Punto d'interesse 2</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="pt_int_B" />
+              </nz-form-control>
+            </nz-form-item>
+        </div>
+        <div nz-col nzSpan="4">
+          <nz-form-item>
+            <nz-form-label >Punto d'interesse 3</nz-form-label>
+            <nz-form-control >
+              <input nz-input formControlName="pt_int_C" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col nzSpan="4">
+          <nz-form-item>
+              <nz-form-label >Punto d'interesse 4</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="pt_int_D" />
+              </nz-form-control>
+            </nz-form-item>
+        </div>
+        <div nz-col nzSpan="4">
+          <nz-form-item>
+            <nz-form-label>Punto d'interesse 5</nz-form-label>
+            <nz-form-control >
+              <input nz-input formControlName="pt_int_E" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col nzSpan="4">
+          <nz-form-item>
+              <nz-form-label >Punto d'interesse 6</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="pt_int_F" />
+              </nz-form-control>
+            </nz-form-item>
+        </div>
+    </div>
+      
+    <nz-form-item>
+        <nz-form-control>
+          <button nz-button nzType="primary" (click)="showModal()">Inserisci nuova taratura</button>
+        </nz-form-control>
+      </nz-form-item>
+
+
+    <nz-modal *ngIf="esito_x && esito_r" [(nzVisible)]="isVisible" [nzTitle]="modalTitle" [nzContent]="modalContent" [nzFooter]="modalFooter" (nzOnCancel)="handleOk()" (nzOnCancel)="handleOkCampione()">
+      <ng-template #modalTitle>Esito inserimento primario</ng-template>
+      <ng-template #modalContent>
+        <p *ngIf="esito_x =='True'" >Primario modificato con successo
+          <span nz-icon [nzType]="'check-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#52c41a'"></span>
+          <br>
+          <br>
+        </p>
+        <p *ngIf="esito_x =='False'">Errore modifica primario
+          <span nz-icon [nzType]="'close-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#eb2f96'"></span>
+        </p>
+        
+      </ng-template>
+      <ng-template #modalFooter>
+        <button nz-button nzType="primary" (click)="handleOk()">Chiudi</button>
+      </ng-template>
+    </nz-modal>
+
+    </form>
+  </ng-container>

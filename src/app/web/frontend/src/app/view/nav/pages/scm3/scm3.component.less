@@ -1,0 +1,69 @@
+.center{
+    display: block;
+    margin: auto;
+    width: 100%;
+}
+
+input {
+    width: 210px;
+    border: 1px solid rgb(221, 218, 218);
+    border-color: #FABB09;
+}
+
+nz-form-label {
+    width: 100%;
+    text-align: left;
+}
+
+.anagrafica {
+    margin-bottom: 30px;
+}
+
+.hidden {
+    display: none;
+}
+
+.pt_int {
+    display: flex;
+    width: max-content;
+    align-items: center;
+    text-align: center;
+    position: relative; /* Aggiunto position: relative per contenere l'elemento assoluto */
+}
+
+.pt_int_input {
+    display: flex;
+    background-color: #FABB09;
+    align-items: center;
+    text-align: left;
+    width: 100%;
+}
+
+.unita_di_misura {
+    position: absolute;
+    right: 10px; /* Regola la posizione a destra secondo le tue preferenze */
+}
+
+.changeFrequency{
+    background-color: red;
+}
+
+nz-alert {
+    margin-bottom: 16px;
+  }
+
+.check-change{
+    margin-left: 10px;
+}
+
+.bias {
+    margin-top: 30px;
+    font-size: 30px;
+    animation: blink 1s linear infinite;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
