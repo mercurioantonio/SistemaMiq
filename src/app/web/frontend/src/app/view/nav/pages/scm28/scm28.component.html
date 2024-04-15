@@ -1,0 +1,886 @@
+<ng-container >
+    <!-- <input type="text" [(ngModel)]="selectedProduct"> -->
+  <form nz-form nzLayout="vertical" [nzAutoTips]="autoTips" [formGroup]="validateForm" (keydown.enter)="$event.preventDefault()">
+    <nz-form-item >
+      <nz-form-label nzRequired>Codice MIQ: </nz-form-label>
+      <nz-form-control>
+        <input nz-input [(ngModel)]="selectedMiq" formControlName="cod_miq" [readonly]="true" style="width: 270px;"/> 
+      </nz-form-control>
+    </nz-form-item>  
+
+    
+    <div *ngIf="status == 'success'" class="anagrafica">
+      <nz-descriptions class="description_title" nzTitle="Anagrafica MIQ" nzBordered *ngIf="dataframeData">
+        <nz-descriptions-item nzTitle="Denominazione strumento" [nzSpan]="2">{{dataframeData.denominazione_strumento}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Scheda di controllo MIQ" [nzSpan]="0.5">{{dataframeData.scm}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Classe" [nzSpan]="0.5">{{dataframeData.classe}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Data ultima taratura">{{dataframeData.data_ult_tarat | date:'dd-MM-yyyy'}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Settimana scadenza">{{dataframeData.settimana_scadenza}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Anno scadenza">{{dataframeData.anno_scadenza}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Unità di misura">{{dataframeData.unita_di_misura}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Risoluzione">{{dataframeData.risoluzione}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Incertezza">{{dataframeData.incertezza}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Frequenza di taratura" [nzSpan]="1.5">{{dataframeData.intervallo_di_taratura}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Campione di riferimento" [nzSpan]="0.75"><a (click)="campione(dataframeData.campione_di_riferimento)">{{dataframeData.campione_di_riferimento}}</a></nz-descriptions-item>
+        <nz-descriptions-item nzTitle="SOT" [nzSpan]="0.75">{{dataframeData.sot}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Toll. tecnica stabilità" [nzSpan]="1.5">{{dataframeData.toll_tecnica_stabilita}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Toll. tecnica ripetibilità" [nzSpan]="1.5">{{dataframeData.toll_tecnica_ripetibilita}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Responsabile taratura" [nzSpan]="1.5">{{dataframeData.responsabile_taratura}}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Addetto taratura" [nzSpan]="1.5">{{dataframeData.addetto_taratura}}</nz-descriptions-item>
+      </nz-descriptions>
+    </div>
+
+    <nz-modal *ngIf="status_campione" [(nzVisible)]="status_campione" [nzTitle]="modalTitle"   [nzContent]="modalContent" [nzFooter]="modalFooter" (nzOnCancel)="handleOkCampione()" [nzWidth]="1000" [nzCentered]="true">
+      <ng-template #modalTitle>Campione di riferimento</ng-template>
+      <ng-template #modalContent>
+        <nz-descriptions class="description_title" nzTitle="{{dataframeCampione[0].cod_miq}}" nzBordered *ngIf="dataframeCampione[0]">
+          <nz-descriptions-item nzTitle="N° certificato" [nzSpan]="3">{{dataframeCampione[0].n_cert}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Scadenza" [nzSpan]="1">{{dataframeCampione[0].scadenza | date:'dd-MM-yyyy'}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Settimana scadenza" [nzSpan]="1">{{dataframeCampione[0].settimana_scadenza}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Anno scadenza" [nzSpan]="1">{{dataframeCampione[0].anno_scadenza}}</nz-descriptions-item>
+        </nz-descriptions>
+        <br>
+        <nz-descriptions class="description_title" nzTitle="{{dataframeCampione[1].cod_miq}}" nzBordered *ngIf="dataframeCampione[1]">
+          <nz-descriptions-item nzTitle="N° certificato" [nzSpan]="3">{{dataframeCampione[1].n_cert}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Scadenza" [nzSpan]="1">{{dataframeCampione[1].scadenza | date:'dd-MM-yyyy'}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Settimana scadenza" [nzSpan]="1">{{dataframeCampione[1].settimana_scadenza}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Anno scadenza" [nzSpan]="1">{{dataframeCampione[1].anno_scadenza}}</nz-descriptions-item>
+        </nz-descriptions>
+        <br>
+        <nz-descriptions class="description_title" nzTitle="{{dataframeCampione[2].cod_miq}}" nzBordered *ngIf="dataframeCampione[2]">
+          <nz-descriptions-item nzTitle="N° certificato" [nzSpan]="3">{{dataframeCampione[2].n_cert}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Scadenza" [nzSpan]="1">{{dataframeCampione[2].scadenza | date:'dd-MM-yyyy'}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Settimana scadenza" [nzSpan]="1">{{dataframeCampione[2].settimana_scadenza}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Anno scadenza" [nzSpan]="1">{{dataframeCampione[2].anno_scadenza}}</nz-descriptions-item>
+        </nz-descriptions>
+        <br>
+        <nz-descriptions class="description_title" nzTitle="{{dataframeCampione[3].cod_miq}}" nzBordered *ngIf="dataframeCampione[3]">
+          <nz-descriptions-item nzTitle="N° certificato" [nzSpan]="3">{{dataframeCampione[3].n_cert}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Scadenza" [nzSpan]="1">{{dataframeCampione[3].scadenza | date:'dd-MM-yyyy'}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Settimana scadenza" [nzSpan]="1">{{dataframeCampione[3].settimana_scadenza}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Anno scadenza" [nzSpan]="1">{{dataframeCampione[3].anno_scadenza}}</nz-descriptions-item>
+        </nz-descriptions>
+        <br>
+        <nz-descriptions class="description_title" nzTitle="{{dataframeCampione[4].cod_miq}}" nzBordered *ngIf="dataframeCampione[4]">
+          <nz-descriptions-item nzTitle="N° certificato" [nzSpan]="3">{{dataframeCampione[4].n_cert}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Scadenza" [nzSpan]="1">{{dataframeCampione[4].scadenza | date:'dd-MM-yyyy'}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Settimana scadenza" [nzSpan]="1">{{dataframeCampione[4].settimana_scadenza}}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="Anno scadenza" [nzSpan]="1">{{dataframeCampione[4].anno_scadenza}}</nz-descriptions-item>
+        </nz-descriptions>
+      </ng-template>
+      <ng-template #modalFooter>
+          <button nz-button nzType="primary" (click)="handleOkCampione()">Chiudi</button>
+      </ng-template>
+    </nz-modal>
+  
+  
+    <div *ngIf="status == 'failed'">
+      <nz-alert
+      nzType="error"
+      nzMessage="Errore"
+      nzDescription="Nessuno strumento di misurazione corrispondente"
+      nzShowIcon
+    ></nz-alert>
+    </div> 
+
+    <div nz-row class="hidden">
+      <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>SCM</nz-form-label>
+            <nz-form-control>
+              <input [(ngModel)]="scm"  formControlName="scm" style="width: 270px;"/>
+            </nz-form-control>
+          </nz-form-item>
+      </div>
+      <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>SCM</nz-form-label>
+            <nz-form-control>
+              <input [(ngModel)]="toll_tecnica_stabilita"  formControlName="toll_tecnica_stabilita" style="width: 270px;"/>
+            </nz-form-control>
+          </nz-form-item>
+      </div>
+      <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>SCM</nz-form-label>
+            <nz-form-control>
+              <input [(ngModel)]="toll_tecnica_ripetibilita"  formControlName="toll_tecnica_ripetibilita" style="width: 270px;"/>
+            </nz-form-control>
+          </nz-form-item>
+      </div>
+
+      <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>SCM</nz-form-label>
+            <nz-form-control>
+              <input [(ngModel)]="y_rif"  formControlName="y_rif" style="width: 270px;"/>
+            </nz-form-control>
+          </nz-form-item>
+      </div>
+      <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>SCM</nz-form-label>
+            <nz-form-control>
+              <input [(ngModel)]="T_pre"  formControlName="T_pre" style="width: 270px;"/>
+            </nz-form-control>
+          </nz-form-item>
+      </div>
+
+      <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>SCM</nz-form-label>
+            <nz-form-control>
+              <input [(ngModel)]="pt_int_A"  formControlName="pt_int_A" style="width: 270px;"/>
+            </nz-form-control>
+          </nz-form-item>
+      </div>
+      <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>SCM</nz-form-label>
+            <nz-form-control>
+              <input [(ngModel)]="pt_int_B"  formControlName="pt_int_B" style="width: 270px;"/>
+            </nz-form-control>
+          </nz-form-item>
+      </div>
+      <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>SCM</nz-form-label>
+            <nz-form-control>
+              <input [(ngModel)]="pt_int_C"  formControlName="pt_int_C" style="width: 270px;"/>
+            </nz-form-control>
+          </nz-form-item>
+      </div>
+      <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>SCM</nz-form-label>
+            <nz-form-control>
+              <input [(ngModel)]="pt_int_D"  formControlName="pt_int_D" style="width: 270px;"/>
+            </nz-form-control>
+          </nz-form-item>
+      </div>
+      <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>SCM</nz-form-label>
+            <nz-form-control>
+              <input [(ngModel)]="pt_int_E"  formControlName="pt_int_E" style="width: 270px;"/>
+            </nz-form-control>
+          </nz-form-item>
+      </div>
+      <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>SCM</nz-form-label>
+            <nz-form-control>
+              <input [(ngModel)]="pt_int_F"  formControlName="pt_int_F" style="width: 270px;"/>
+            </nz-form-control>
+          </nz-form-item>
+      </div>
+    </div>  
+
+  
+    <div nz-row>
+      <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>Data taratura</nz-form-label>
+            <nz-form-control>
+              <nz-date-picker nzFormat="dd-MM-yyyy" [(ngModel)]="data"  (ngModelChange)="data = $event"formControlName="data" style="width: 270px;"></nz-date-picker>
+            </nz-form-control>
+          </nz-form-item>
+      </div>
+    </div> 
+    
+    <div *ngIf="pt_int_D">
+      <div nz-row>
+        <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>Verifica strumento</nz-form-label>
+            <nz-form-control>
+              <div nz-row class="pt_int">
+                <input nz-input  class="pt_int_input" [(ngModel)]="pt_int_D" [readonly]="true" formControlName="pt_int_D" />
+                <span class="unita_di_misura">{{dataframeData.unita_di_misura}}</span>
+              </div>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+  
+      <div nz-row>
+          <div nz-col nzSpan="4">
+            <nz-form-item>
+              <nz-form-label nzFor="selectOption" nzRequired>Calibrazione</nz-form-label>
+              <nz-form-control>
+                <nz-select id="selectOption" name="selectOption" [(ngModel)]="cal_option4" formControlName="calibrazione_D" (ngModelChange)="dataChanged($event); id('D')" style="width: 210px;">
+                  <nz-option nzValue="true" nzLabel="Si"></nz-option>
+                  <nz-option nzValue="false" nzLabel="No"></nz-option>
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col nzSpan="4">
+            <nz-form-item *ngIf="cal_option4 == 'true'" style="margin-left: 50px;">
+              <nz-form-label nzFor="val_calib_D" nzRequired>y strumento calibrazione</nz-form-label>
+              <nz-form-control>
+                <input  nz-input formControlName="val_calib_D" [(ngModel)]="val_calib_D" [required]="cal_option4 == 'true'"  style="width: 210px;" [pattern]="numericPattern" (input)="onInput($event)"/>
+              </nz-form-control>
+              <nz-form-label nzFor="val_calib_master_D" nzRequired>y master calibrazione</nz-form-label>
+              <nz-form-control>
+                <input  nz-input [readonly]="true" formControlName="val_calib_master_D" [(ngModel)]="val_calib_master_D" [required]="cal_option4 == 'true'"  style="width: 210px;" [pattern]="numericPattern" (input)="onInput($event)"/>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+      </div>
+    </div>
+
+    <div *ngIf="pt_int_C && !pt_int_D">
+      <div nz-row>
+        <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>Verifica strumento</nz-form-label>
+            <nz-form-control>
+              <div nz-row class="pt_int">
+                <input nz-input  class="pt_int_input" [(ngModel)]="pt_int_C" [readonly]="true" formControlName="pt_int_C" />
+                <span class="unita_di_misura">{{dataframeData.unita_di_misura}}</span>
+              </div>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <div nz-row>
+          <div nz-col nzSpan="4">
+            <nz-form-item>
+              <nz-form-label nzFor="selectOption" nzRequired>Calibrazione</nz-form-label>
+                  <nz-form-control>
+                      <nz-select id="selectOption" name="selectOption" [(ngModel)]="cal_option3" formControlName="calibrazione_C" (ngModelChange)="dataChanged($event); id('C')" style="width: 210px;">
+                          <nz-option nzValue="true" nzLabel="Si"></nz-option>
+                          <nz-option nzValue="false" nzLabel="No"></nz-option>
+                  </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col nzSpan="4">
+            <nz-form-item *ngIf="cal_option3 == 'true'" style="margin-left: 50px;">
+                <nz-form-label nzFor="val_calib_C" nzRequired>y strumento calibrazione</nz-form-label>
+                  <nz-form-control>
+                      <input  nz-input formControlName="val_calib_C" [(ngModel)]="val_calib_C" [required]="cal_option3 == 'true'"  style="width: 210px;" [pattern]="numericPattern" (input)="onInput($event)"/>
+                </nz-form-control>
+                <nz-form-label nzFor="val_calib_master_C" nzRequired>y master calibrazione</nz-form-label>
+                <nz-form-control>
+                      <input  nz-input [readonly]="true" formControlName="val_calib_master_C" [(ngModel)]="val_calib_master_C" [required]="cal_option3 == 'true'"  style="width: 210px;" [pattern]="numericPattern" (input)="onInput($event)"/>
+                </nz-form-control>
+            </nz-form-item>
+          </div>
+      </div>
+    </div> 
+
+    <div nz-row>
+      <div nz-col nzSpan="4">
+      <nz-form-item>
+          <nz-form-label nzRequired>Punto d'interesse 1</nz-form-label>
+          <nz-form-control>
+            <div nz-row class="pt_int">
+              <input nz-input  class="pt_int_input" [(ngModel)]="pt_int_A" [readonly]="true" formControlName="pt_int_A" />
+              <span class="unita_di_misura">{{dataframeData.unita_di_misura}}</span>
+            </div>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+      <p *ngIf="esito_A_bias =='True'" class="bias"><span nz-icon [nzType]="'warning'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#fab414'" style="margin-right: 10px;"></span>BIAS (valori inseriti non coerenti con il punto d'interesse)</p>
+    </div>
+
+    <div nz-row>
+        <div nz-col nzSpan="4">
+          <nz-form-item>
+            <nz-form-label nzFor="selectOption" nzRequired>Calibrazione 1</nz-form-label>
+            <nz-form-control>
+              <nz-select id="selectOption" name="selectOption" [(ngModel)]="cal_option1" formControlName="calibrazione_A" (ngModelChange)="dataChanged($event); id('A')" style="width: 210px;">
+                <nz-option nzValue="true" nzLabel="Si"></nz-option>
+                <nz-option nzValue="false" nzLabel="No"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col nzSpan="4">
+          <nz-form-item *ngIf="cal_option1 == 'true'" style="margin-left: 50px;">
+            <nz-form-label nzFor="val_calib_A" nzRequired>y strumento calibrazione 1</nz-form-label>
+            <nz-form-control>
+              <input  nz-input formControlName="val_calib_A" [(ngModel)]="val_calib_A" [required]="cal_option1 === 'true'"  style="width: 210px;" [pattern]="numericPattern" (input)="onInput($event)"/>
+            </nz-form-control>
+            <nz-form-label nzFor="val_calib_master_A" nzRequired>y master calibrazione 1</nz-form-label>
+            <nz-form-control>
+              <input  nz-input [readonly]="true" formControlName="val_calib_master_A" [(ngModel)]="val_calib_master_A" [required]="cal_option1 === 'true'"  style="width: 210px;" [pattern]="numericPattern" (input)="onInput($event)"/>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+    </div>    
+  
+    <div nz-row>
+          <div nz-col nzSpan="4">
+          <nz-form-item>
+              <nz-form-label nzRequired>y1 strumento</nz-form-label>
+              <nz-form-control>
+                <input nz-input id="y1_strum_A" formControlName="y1_strum_A" (input)="calcolaDifferenze()" [pattern]="numericPattern" (input)="onInput($event)"/>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div style="width: 50px;"></div>
+          <div nz-col nzSpan="4">
+            <nz-form-item>
+              <nz-form-label nzRequired>y2 strumento</nz-form-label>
+              <nz-form-control>
+                <input nz-input id="y2_strum_A" formControlName="y2_strum_A" (input)="calcolaDifferenze()" [pattern]="numericPattern" (input)="onInput($event)"/>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div style="width: 50px;"></div>
+          <div nz-col nzSpan="4">
+            <nz-form-item>
+              <nz-form-label nzRequired>y3 strumento</nz-form-label>
+              <nz-form-control>
+                <input nz-input id="y3_strum_A" formControlName="y3_strum_A" (input)="calcolaDifferenze()" [pattern]="numericPattern" (input)="onInput($event)"/>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+      </div>
+  
+      <div nz-row>
+        <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>y1 master</nz-form-label>
+            <nz-form-control>
+              <input nz-input id="y1_master_A" [(ngModel)]="y1_master_A" [readonly]="true" formControlName="y1_master_A" [pattern]="numericPattern" (input)="onInput($event)"/>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div style="width: 50px;"></div>
+        <div nz-col nzSpan="4">
+          <nz-form-item>
+            <nz-form-label nzRequired>y2 master</nz-form-label>
+            <nz-form-control>
+              <input nz-input id="y2_master_A" [(ngModel)]="y2_master_A" [readonly]="true" formControlName="y2_master_A" [pattern]="numericPattern" (input)="onInput($event)"/>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div style="width: 50px;"></div>
+        <div nz-col nzSpan="4">
+          <nz-form-item>
+            <nz-form-label nzRequired>y3 master</nz-form-label>
+            <nz-form-control>
+              <input nz-input id="y3_master_A" [(ngModel)]="y3_master_A" [readonly]="true" formControlName="y3_master_A" [pattern]="numericPattern" (input)="onInput($event)"/>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+    </div>
+
+    <div id="risultati">
+      <p>ΔMedie (strum-master): {{ mediaDifferenze_A | number: '1.3-3'}}
+        <span *ngIf="esito_A_x ==='True' && isNumeric(mediaDifferenze_A)" nz-icon [nzType]="'check-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#52c41a'"></span>
+        <span *ngIf="esito_A_x ==='False' && isNumeric(mediaDifferenze_A)" nz-icon [nzType]="'close-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#eb2f96'"></span>
+      </p>
+      <p>Range: {{range_A | number: '1.3-3'}}
+        <span *ngIf="esito_A_r =='True' && isNumeric(range_A)" nz-icon [nzType]="'check-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#52c41a'"></span>
+        <span *ngIf="esito_A_r =='False' && isNumeric(range_A)" nz-icon [nzType]="'close-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#eb2f96'"></span>
+      </p>
+    </div>
+
+
+    <div nz-row>
+      <div nz-col nzSpan="4">
+      <nz-form-item>
+          <nz-form-label nzRequired>Punto d'interesse 2</nz-form-label>
+          <nz-form-control>
+            <div nz-row class="pt_int">
+              <input nz-input  class="pt_int_input" [(ngModel)]="pt_int_B" [readonly]="true" formControlName="pt_int_B" />
+              <span class="unita_di_misura">{{dataframeData.unita_di_misura}}</span>
+            </div>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+      <p *ngIf="esito_B_bias =='True'" class="bias"><span nz-icon [nzType]="'warning'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#fab414'" style="margin-right: 10px;"></span>BIAS (valori inseriti non coerenti con il punto d'interesse)</p>
+    </div>
+
+    <div nz-row>
+        <div nz-col nzSpan="4">
+          <nz-form-item>
+            <nz-form-label nzFor="selectOption" nzRequired>Calibrazione 2</nz-form-label>
+            <nz-form-control>
+              <nz-select id="selectOption" name="selectOption" [(ngModel)]="cal_option2" formControlName="calibrazione_B" (ngModelChange)="dataChanged($event); id('B')" style="width: 210px;">
+                <nz-option nzValue="true" nzLabel="Si"></nz-option>
+                <nz-option nzValue="false" nzLabel="No"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col nzSpan="4">
+          <nz-form-item *ngIf="cal_option2 == 'true'" style="margin-left: 50px;">
+            <nz-form-label nzFor="val_calib_B" nzRequired>y strumento calibrazione 2</nz-form-label>
+            <nz-form-control>
+              <input  nz-input formControlName="val_calib_B" [(ngModel)]="val_calib_B" [required]="cal_option2 == 'true'"  style="width: 210px;" [pattern]="numericPattern" (input)="onInput($event)"/>
+            </nz-form-control>
+            <nz-form-label nzFor="val_calib_master_B" nzRequired>y master calibrazione 2</nz-form-label>
+            <nz-form-control>
+              <input  nz-input [readonly]="true" formControlName="val_calib_master_B" [(ngModel)]="val_calib_master_B" [required]="cal_option2 == 'true'"  style="width: 210px;" [pattern]="numericPattern" (input)="onInput($event)"/>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+    </div>  
+  
+    <div nz-row>
+          <div nz-col nzSpan="4">
+          <nz-form-item>
+              <nz-form-label nzRequired>y1 strumento</nz-form-label>
+              <nz-form-control>
+                <input nz-input id="y1_strum_B" formControlName="y1_strum_B" (input)="calcolaDifferenze()" [pattern]="numericPattern" (input)="onInput($event)"/>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div style="width: 50px;"></div>
+          <div nz-col nzSpan="4">
+            <nz-form-item>
+              <nz-form-label nzRequired>y2 strumento</nz-form-label>
+              <nz-form-control>
+                <input nz-input id="y2_strum_B" formControlName="y2_strum_B" (input)="calcolaDifferenze()" [pattern]="numericPattern" (input)="onInput($event)"/>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div style="width: 50px;"></div>
+          <div nz-col nzSpan="4">
+            <nz-form-item>
+              <nz-form-label nzRequired>y3 strumento</nz-form-label>
+              <nz-form-control>
+                <input nz-input id="y3_strum_B" formControlName="y3_strum_B" (input)="calcolaDifferenze()" [pattern]="numericPattern" (input)="onInput($event)"/>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+      </div>
+  
+      <div nz-row>
+        <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>y1 master</nz-form-label>
+            <nz-form-control>
+              <input nz-input id="y1_master_B" [(ngModel)]="y1_master_B" [readonly]="true" formControlName="y1_master_B" [pattern]="numericPattern" (input)="onInput($event)"/>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div style="width: 50px;"></div>
+        <div nz-col nzSpan="4">
+          <nz-form-item>
+            <nz-form-label nzRequired>y2 master</nz-form-label>
+            <nz-form-control>
+              <input nz-input id="y2_master_B" [(ngModel)]="y2_master_B" [readonly]="true" formControlName="y2_master_B" [pattern]="numericPattern" (input)="onInput($event)"/>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div style="width: 50px;"></div>
+        <div nz-col nzSpan="4">
+          <nz-form-item>
+            <nz-form-label nzRequired>y3 master</nz-form-label>
+            <nz-form-control>
+              <input nz-input id="y3_master_B" [(ngModel)]="y3_master_B" [readonly]="true" formControlName="y3_master_B" [pattern]="numericPattern" (input)="onInput($event)"/>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+    </div>
+
+    <div id="risultati">
+      <p>ΔMedie (strum-master): {{ mediaDifferenze_B | number: '1.3-3'}}
+        <span *ngIf="esito_B_x ==='True' && isNumeric(mediaDifferenze_B)" nz-icon [nzType]="'check-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#52c41a'"></span>
+        <span *ngIf="esito_B_x ==='False' && isNumeric(mediaDifferenze_B)" nz-icon [nzType]="'close-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#eb2f96'"></span>
+      </p>
+      <p>Range: {{range_B | number: '1.3-3'}}
+        <span *ngIf="esito_B_r =='True' && isNumeric(range_B)" nz-icon [nzType]="'check-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#52c41a'"></span>
+        <span *ngIf="esito_B_r =='False' && isNumeric(range_B)" nz-icon [nzType]="'close-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#eb2f96'"></span>
+      </p>
+    </div>
+
+    <div nz-row>
+      <div nz-col nzSpan="4">
+      <nz-form-item>
+          <nz-form-label nzRequired>Punto d'interesse 3</nz-form-label>
+          <nz-form-control>
+            <div nz-row class="pt_int">
+              <input nz-input  class="pt_int_input" [(ngModel)]="pt_int_C" [readonly]="true" formControlName="pt_int_C" />
+              <span class="unita_di_misura">{{dataframeData.unita_di_misura}}</span>
+            </div>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+      <p *ngIf="esito_C_bias =='True'" class="bias"><span nz-icon [nzType]="'warning'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#fab414'" style="margin-right: 10px;"></span>BIAS (valori inseriti non coerenti con il punto d'interesse)</p>
+    </div>
+
+    <div *ngIf="pt_int_D">
+      <div nz-row>
+          <div nz-col nzSpan="4">
+            <nz-form-item>
+              <nz-form-label nzFor="selectOption" nzRequired>Calibrazione 3</nz-form-label>
+                  <nz-form-control>
+                      <nz-select id="selectOption" name="selectOption" [(ngModel)]="cal_option3" formControlName="calibrazione_C" (ngModelChange)="dataChanged($event); id('C')" style="width: 210px;">
+                          <nz-option nzValue="true" nzLabel="Si"></nz-option>
+                          <nz-option nzValue="false" nzLabel="No"></nz-option>
+                  </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col nzSpan="4">
+            <nz-form-item *ngIf="cal_option3 == 'true'" style="margin-left: 50px;">
+                <nz-form-label nzFor="val_calib_C" nzRequired>y strumento calibrazione 3</nz-form-label>
+                  <nz-form-control>
+                      <input  nz-input formControlName="val_calib_C" [(ngModel)]="val_calib_C" [required]="cal_option3 == 'true'"  style="width: 210px;" [pattern]="numericPattern" (input)="onInput($event)"/>
+                </nz-form-control>
+                <nz-form-label nzFor="val_calib_master_C" nzRequired>y master calibrazione 3</nz-form-label>
+                <nz-form-control>
+                      <input  nz-input [readonly]="true" formControlName="val_calib_master_C" [(ngModel)]="val_calib_master_C" [required]="cal_option3 == 'true'"  style="width: 210px;" [pattern]="numericPattern" (input)="onInput($event)"/>
+                </nz-form-control>
+            </nz-form-item>
+          </div>
+      </div>  
+    </div>
+  
+    <div nz-row>
+          <div nz-col nzSpan="4">
+          <nz-form-item>
+              <nz-form-label nzRequired>y1 strumento</nz-form-label>
+              <nz-form-control>
+                <input nz-input id="y1_strum_C" formControlName="y1_strum_C" (input)="calcolaDifferenze()" [pattern]="numericPattern" (input)="onInput($event)"/>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div style="width: 50px;"></div>
+          <div nz-col nzSpan="4">
+            <nz-form-item>
+              <nz-form-label nzRequired>y2 strumento</nz-form-label>
+              <nz-form-control>
+                <input nz-input id="y2_strum_C" formControlName="y2_strum_C" (input)="calcolaDifferenze()" [pattern]="numericPattern" (input)="onInput($event)"/>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div style="width: 50px;"></div>
+          <div nz-col nzSpan="4">
+            <nz-form-item>
+              <nz-form-label nzRequired>y3 strumento</nz-form-label>
+              <nz-form-control>
+                <input nz-input id="y3_strum_C" formControlName="y3_strum_C" (input)="calcolaDifferenze()" [pattern]="numericPattern" (input)="onInput($event)"/>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+      </div>
+  
+      <div nz-row>
+        <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>y1 master</nz-form-label>
+            <nz-form-control>
+              <input nz-input id="y1_master_C" [(ngModel)]="y1_master_C" [readonly]="true" formControlName="y1_master_C" [pattern]="numericPattern" (input)="onInput($event)"/>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div style="width: 50px;"></div>
+        <div nz-col nzSpan="4">
+          <nz-form-item>
+            <nz-form-label nzRequired>y2 master</nz-form-label>
+            <nz-form-control>
+              <input nz-input id="y2_master_C" [(ngModel)]="y2_master_C" [readonly]="true" formControlName="y2_master_C" [pattern]="numericPattern" (input)="onInput($event)"/>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div style="width: 50px;"></div>
+        <div nz-col nzSpan="4">
+          <nz-form-item>
+            <nz-form-label nzRequired>y3 master</nz-form-label>
+            <nz-form-control>
+              <input nz-input id="y3_master_C" [(ngModel)]="y3_master_C" [readonly]="true" formControlName="y3_master_C" [pattern]="numericPattern" (input)="onInput($event)"/>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+    </div>
+
+    <div id="risultati">
+      <p>ΔMedie (strum-master): {{ mediaDifferenze_C | number: '1.3-3'}}
+        <span *ngIf="esito_C_x ==='True' && isNumeric(mediaDifferenze_C)" nz-icon [nzType]="'check-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#52c41a'"></span>
+        <span *ngIf="esito_C_x ==='False' && isNumeric(mediaDifferenze_C)" nz-icon [nzType]="'close-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#eb2f96'"></span>
+      </p>
+      <p>Range: {{range_C | number: '1.3-3'}}
+        <span *ngIf="esito_C_r =='True' && isNumeric(range_C)" nz-icon [nzType]="'check-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#52c41a'"></span>
+        <span *ngIf="esito_C_r =='False' && isNumeric(range_C)" nz-icon [nzType]="'close-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#eb2f96'"></span>
+      </p>
+    </div>
+
+    <div *ngIf="pt_int_D">
+    <div nz-row>
+      <div nz-col nzSpan="4">
+      <nz-form-item>
+          <nz-form-label nzRequired>Punto d'interesse 4</nz-form-label>
+          <nz-form-control>
+            <div nz-row class="pt_int">
+              <input nz-input  class="pt_int_input" [(ngModel)]="pt_int_D" [readonly]="true" formControlName="pt_int_D" />
+              <span class="unita_di_misura">{{dataframeData.unita_di_misura}}</span>
+            </div>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+      <p *ngIf="esito_D_bias =='True'" class="bias"><span nz-icon [nzType]="'warning'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#fab414'" style="margin-right: 10px;"></span>BIAS (valori inseriti non coerenti con il punto d'interesse)</p>
+    </div> 
+  
+    <div nz-row>
+          <div nz-col nzSpan="4">
+          <nz-form-item>
+              <nz-form-label nzRequired>y1 strumento</nz-form-label>
+              <nz-form-control>
+                <input nz-input id="y1_strum_D" formControlName="y1_strum_D" (input)="calcolaDifferenze()" [pattern]="numericPattern" (input)="onInput($event)"/>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div style="width: 50px;"></div>
+          <div nz-col nzSpan="4">
+            <nz-form-item>
+              <nz-form-label nzRequired>y2 strumento</nz-form-label>
+              <nz-form-control>
+                <input nz-input id="y2_strum_D" formControlName="y2_strum_D" (input)="calcolaDifferenze()" [pattern]="numericPattern" (input)="onInput($event)"/>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div style="width: 50px;"></div>
+          <div nz-col nzSpan="4">
+            <nz-form-item>
+              <nz-form-label nzRequired>y3 strumento</nz-form-label>
+              <nz-form-control>
+                <input nz-input id="y3_strum_D" formControlName="y3_strum_D" (input)="calcolaDifferenze()" [pattern]="numericPattern" (input)="onInput($event)"/>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+    </div>
+  
+    <div nz-row>
+        <div nz-col nzSpan="4">
+        <nz-form-item>
+            <nz-form-label nzRequired>y1 master</nz-form-label>
+            <nz-form-control>
+              <input nz-input id="y1_master_D" [(ngModel)]="y1_master_D" [readonly]="true" formControlName="y1_master_D" [pattern]="numericPattern" (input)="onInput($event)"/>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div style="width: 50px;"></div>
+        <div nz-col nzSpan="4">
+          <nz-form-item>
+            <nz-form-label nzRequired>y2 master</nz-form-label>
+            <nz-form-control>
+              <input nz-input id="y2_master_D" [(ngModel)]="y2_master_D" [readonly]="true" formControlName="y2_master_D" [pattern]="numericPattern" (input)="onInput($event)"/>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div style="width: 50px;"></div>
+        <div nz-col nzSpan="4">
+          <nz-form-item>
+            <nz-form-label nzRequired>y3 master</nz-form-label>
+            <nz-form-control>
+              <input nz-input id="y3_master_D" [(ngModel)]="y3_master_D" [readonly]="true" formControlName="y3_master_D" [pattern]="numericPattern" (input)="onInput($event)"/>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+    </div>
+
+    <div id="risultati">
+      <p>ΔMedie (strum-master): {{ mediaDifferenze_D | number: '1.3-3'}}
+        <span *ngIf="esito_D_x ==='True' && isNumeric(mediaDifferenze_D)" nz-icon [nzType]="'check-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#52c41a'"></span>
+        <span *ngIf="esito_D_x ==='False' && isNumeric(mediaDifferenze_D)" nz-icon [nzType]="'close-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#eb2f96'"></span>
+      </p>
+      <p>Range: {{range_D | number: '1.3-3'}}
+        <span *ngIf="esito_D_r =='True' && isNumeric(range_D)" nz-icon [nzType]="'check-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#52c41a'"></span>
+        <span *ngIf="esito_D_r =='False' && isNumeric(range_D)" nz-icon [nzType]="'close-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#eb2f96'"></span>
+      </p>
+    </div>
+  </div>
+      
+      <nz-form-item>
+          <nz-form-control>
+            <button nz-button nzType="primary" (click)="showModal()">Inserisci nuova taratura</button>
+          </nz-form-control>
+      </nz-form-item>
+
+
+      <nz-modal *ngIf="isVisible_ok" [(nzVisible)]="isVisible_ok" [nzTitle]="modalTitle"   [nzContent]="modalContent"    [nzFooter]="modalFooter" (nzOnCancel)="handleOk()" [nzWidth]="1000" [nzCentered]="true">
+        <ng-template #modalTitle>Esito taratura</ng-template>
+        <ng-template #modalContent>
+          <div>
+            <h1 *ngIf="myCheckAll == 'true'">Nuova scadenza: {{calculateDueDate()}}, Week: {{calculateDueWeek()}}</h1>
+            <h1 *ngIf="myCheckUser == 'true'">Taratura inserita correttamente</h1>
+          </div>
+          <div nz-row>
+            <div nz-col>
+            <h1 *ngIf="esito_x =='True'">Stabilità
+            <span nz-icon [nzType]="'check-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#52c41a'"></span>
+            </h1>
+            <p *ngIf="esito_x =='True'" > 
+              <span>Punto d'interesse 1:  <b>{{pt_int_A}}</b></span>
+              <br>
+              <span>ΔMedie (strum-master): {{ mediaDifferenze_A | number: '1.3-3'}}</span>
+              <br>
+              <span>Punto d'interesse 2:  <b>{{pt_int_B}}</b></span>
+              <br>
+              <span>ΔMedie (strum-master): {{ mediaDifferenze_B | number: '1.3-3'}}</span>
+              <br>
+              <span *ngIf="pt_int_C">
+              <span>Punto d'interesse 3:  <b>{{pt_int_C}}</b></span>
+              <br>
+              <span>ΔMedie (strum-master): {{ mediaDifferenze_C | number: '1.3-3'}}</span>
+              <br>
+              </span>
+              <span *ngIf="pt_int_D">
+              <span>Punto d'interesse 4:  <b>{{pt_int_D}}</b></span>
+              <br>
+              <span>ΔMedie (strum-master): {{ mediaDifferenze_D | number: '1.3-3'}}</span>
+              <br>
+              </span>
+            </p>
+            </div>
+            <div nz-col>
+            <h1 *ngIf="esito_x =='False'">Stabilità
+            <span nz-icon [nzType]="'close-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#eb2f96'"></span>
+            </h1>
+            <p *ngIf="esito_x =='False'">
+              <span>Punto d'interesse 1:  <b>{{pt_int_A}}</b></span>
+              <br>
+              <span>ΔMedie (strum-master): {{ mediaDifferenze_A | number: '1.3-3'}}</span>
+              <br>
+              <span>Punto d'interesse 2:  <b>{{pt_int_B}}</b></span>
+              <br>
+              <span>ΔMedie (strum-master): {{ mediaDifferenze_B | number: '1.3-3'}}</span>
+              <br>
+              <span *ngIf="pt_int_C">
+              <span>Punto d'interesse 3:  <b>{{pt_int_C}}</b></span>
+              <br>
+              <span>ΔMedie (strum-master): {{ mediaDifferenze_C | number: '1.3-3'}}</span>
+              <br>
+              </span>
+              <span *ngIf="pt_int_D">
+              <span>Punto d'interesse 4:  <b>{{pt_int_D}}</b></span>
+              <br>
+              <span>ΔMedie (strum-master): {{ mediaDifferenze_D | number: '1.3-3'}}</span>
+              <br>
+              </span>          
+            </p>
+           </div>
+           <div nz-col style="margin-left: 200px;">
+            <h1 *ngIf="esito_r =='True'">Ripetibilità
+            <span nz-icon [nzType]="'check-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#52c41a'"></span>
+            </h1>
+            <p *ngIf="esito_r =='True'">
+              <span>Punto d'interesse 1:  <b>{{pt_int_A}}</b></span>     
+              <br>
+              <span>Range: {{range_A | number: '1.3-3'}}</span>  
+              <br>
+              <span>Punto d'interesse 2:  <b>{{pt_int_B}}</b></span>
+              <br>
+              <span>Range: {{range_B | number: '1.3-3'}}</span>
+              <br>
+              <span *ngIf="pt_int_C">
+              <span>Punto d'interesse 3:  <b>{{pt_int_C}}</b></span>
+              <br>
+              <span>Range: {{range_C | number: '1.3-3'}}</span>
+              <br>
+              </span>
+              <span *ngIf="pt_int_D">
+              <span>Punto d'interesse 4:  <b>{{pt_int_D}}</b></span>
+              <br>
+              <span>Range: {{range_D | number: '1.3-3'}}</span>
+              <br> 
+              </span>       
+            </p>
+            </div>
+            <div nz-col style="margin-left: 200px;">
+            <h1 *ngIf="esito_r =='False'">Ripetibilità
+            <span nz-icon [nzType]="'close-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#eb2f96'"></span>
+            </h1>
+            <p *ngIf="esito_r =='False'"> 
+              <span>Punto d'interesse 1:  <b>{{pt_int_A}}</b></span>     
+              <br>
+              <span>Range: {{range_A | number: '1.3-3'}}</span>  
+              <br>
+              <span>Punto d'interesse 2:  <b>{{pt_int_B}}</b></span>
+              <br>
+              <span>Range: {{range_B | number: '1.3-3'}}</span>
+              <br>
+              <span *ngIf="pt_int_C">
+              <span>Punto d'interesse 3:  <b>{{pt_int_C}}</b></span>
+              <br>
+              <span>Range: {{range_C | number: '1.3-3'}}</span>
+              <br>
+              </span>
+              <span *ngIf="pt_int_D">
+              <span>Punto d'interesse 4:  <b>{{pt_int_D}}</b></span>
+              <br>
+              <span>Range: {{range_D | number: '1.3-3'}}</span>
+              <br> 
+              </span> 
+            </p>
+            </div>
+            </div>
+        </ng-template>
+        <ng-template #modalFooter>
+          <button nz-button nzType="primary" (click)="handleOk()">Chiudi</button>
+        </ng-template>
+      </nz-modal>
+
+      <nz-modal *ngIf="isVisible_ko" [(nzVisible)]="isVisible_ko" [nzTitle]="modalTitle"   [nzContent]="modalContent"    [nzFooter]="modalFooter" (nzOnCancel)="handleOk_ko()">
+        <ng-template #modalTitle>Attenzione form non valido</ng-template>
+        <ng-template #modalContent>
+          <p >
+            <span nz-icon [nzType]="'warning'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#fab414'"></span>
+            Controlla di aver inserito correttamente tutti i campi richiesti
+          </p>
+          <p *ngIf="esito_A_x =='False'" >
+            Punto d'interesse 1:  <b>{{pt_int_A}}</b>
+            <br>
+            La taratura non rientra dentro i limiti di stabilità  
+            <span nz-icon [nzType]="'close-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#eb2f96'"></span>
+          </p>
+          <p *ngIf="esito_A_r =='False'" >
+            Punto d'interesse 1:  <b>{{pt_int_A}}</b>
+            <br>
+            La taratura non rientra dentro i limiti di ripetibilità
+            <span nz-icon [nzType]="'close-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#eb2f96'"></span>     
+          </p>
+          <p *ngIf="esito_B_x =='False'" >
+            Punto d'interesse 2:  <b>{{pt_int_B}}</b>
+            <br>
+            La taratura non rientra dentro i limiti di stabilità  
+            <span nz-icon [nzType]="'close-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#eb2f96'"></span>
+          </p>
+          <p *ngIf="esito_B_r =='False'" >
+            Punto d'interesse 2:  <b>{{pt_int_B}}</b>
+            <br>
+            La taratura non rientra dentro i limiti di ripetibilità
+            <span nz-icon [nzType]="'close-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#eb2f96'"></span>     
+          </p>
+          <p *ngIf="esito_C_x =='False'" >
+            Punto d'interesse 3:  <b>{{pt_int_C}}</b>
+            <br>
+            La taratura non rientra dentro i limiti di stabilità  
+            <span nz-icon [nzType]="'close-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#eb2f96'"></span>
+          </p>
+          <p *ngIf="esito_C_r =='False'" >
+            Punto d'interesse 3:  <b>{{pt_int_C}}</b>
+            <br>
+            La taratura non rientra dentro i limiti di ripetibilità
+            <span nz-icon [nzType]="'close-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#eb2f96'"></span>     
+          </p>
+          <p *ngIf="esito_D_x =='False'" >
+            Punto d'interesse 4:  <b>{{pt_int_D}}</b>
+            <br>
+            La taratura non rientra dentro i limiti di stabilità  
+            <span nz-icon [nzType]="'close-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#eb2f96'"></span>
+          </p>
+          <p *ngIf="esito_D_r =='False'" >
+            Punto d'interesse 4:  <b>{{pt_int_D}}</b>
+            <br>
+            La taratura non rientra dentro i limiti di ripetibilità
+            <span nz-icon [nzType]="'close-circle'" [nzTheme]="'twotone'" [nzTwotoneColor]="'#eb2f96'"></span>     
+          </p>
+        </ng-template>
+        <ng-template #modalFooter>
+          <button nz-button nzType="primary" (click)="handleOk_ko()">Chiudi</button>
+        </ng-template>
+      </nz-modal>      
+    </form>
+  </ng-container>
+  
